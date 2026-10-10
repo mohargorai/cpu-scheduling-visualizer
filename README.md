@@ -29,18 +29,20 @@
   - Preemptive Priority Scheduling
   - Multi-Level Feedback Queue (MLFQ)
 - **Live Interactive Visualization:**
-  - Real-time Gantt Chart generation.
+  - Real-time seamless auto-run simulation: Change any parameter (algorithm, time quantum, add/remove process) and watch all charts update instantly without clicking "Run".
   - Interactive Queue Visualizer with a timeline scrubber to replay process execution state at any millisecond.
+  - Dynamic playback speed controls (0.5x to 500x) with O(log N) binary search for ultra-fast scrubbing.
 - **Comparative Analytics Dashboard:**
-  - Automated calculation of Average Waiting Time and Turnaround Time.
-  - Individual Process Metrics visualized via responsive Bar Charts.
+  - Automated calculation of Average Waiting Time, Turnaround Time, and CPU Utilization.
+  - Individual Process Metrics visualized via responsive, paginated Bar Charts.
 - **Mass-Scale Workload Handling:**
   - Import external datasets directly via `.csv` or `.json`.
-  - Capable of running perfectly smooth simulations with 800+ concurrent processes.
+  - Capable of running perfectly smooth simulations with 5,000+ concurrent processes.
+  - Highly-optimized algorithms: Replaced O(N) DOM manipulations and string lookups with O(1) logic to prevent UI thread blocking.
 - **Premium UI/UX:**
   - "Full Black" highly polished dark mode.
-  - Interactive minimap (Brush slider) and infinitely scrollable timeline rendering for handling hundreds of processes without lag.
-  - Fluid physics-based animations (Framer Motion) that intelligently degrade to raw HTML when queue sizes scale massively.
+  - Infinite smooth pagination for timeline rendering and metrics, allowing smooth 60fps rendering of thousands of processes without browser crashes.
+  - Fluid physics-based animations (Framer Motion) that elegantly handle UI state transitions.
 
 ## 🛠️ Technology Stack
 

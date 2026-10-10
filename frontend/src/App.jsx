@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useStore } from './store';
 import { GanttChart } from './components/GanttChart';
@@ -12,9 +12,19 @@ function App() {
   const { processes, algorithm, config, setSimulationResult, simulationResult } = useStore();
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (simulationResult) {
+      if (processes.length > 0) {
+        runSimulation();
+      } else {
+        setSimulationResult(null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [processes, algorithm, config]);
+
   const runSimulation = async () => {
     setLoading(true);
-    setSimulationResult(null); 
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const res = await axios.post(`${API_URL}/api/simulate`, {
@@ -22,12 +32,22 @@ function App() {
         processes,
         config
       });
-      setTimeout(() => setSimulationResult(res.data), 150); 
+      // If no results are on screen, wait for the placeholder to fade out before showing results.
+      // If results are already on screen, swap them immediately for a seamless transition.
+      if (!simulationResult) {
+        setTimeout(() => {
+          setSimulationResult(res.data);
+          setLoading(false);
+        }, 400); 
+      } else {
+        setSimulationResult(res.data);
+        setLoading(false);
+      }
     } catch (err) {
       console.error(err);
       alert("Simulation failed. Make sure backend is running.");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const containerVariants = {

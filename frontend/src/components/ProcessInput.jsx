@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useStore } from '../store';
-import { Plus, Trash2, Settings, Users, Activity, Upload } from 'lucide-react';
+import { Plus, Trash2, Users, Activity, Upload, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const algorithms = ['FCFS', 'SJF', 'SRTF', 'RR', 'Priority', 'PreemptivePriority', 'MLFQ'];
@@ -11,7 +11,9 @@ export function ProcessInput() {
   const fileInputRef = useRef(null);
 
   const handleAdd = () => {
-    const id = `P${processes.length > 0 ? Math.max(...processes.map(p => parseInt(p.id.replace('P', '')) || 0)) + 1 : 1}`;
+    const lastProcess = processes[processes.length - 1];
+    const newIdNum = lastProcess ? (parseInt(lastProcess.id.replace('P', '')) || processes.length) + 1 : 1;
+    const id = `P${newIdNum}`;
     addProcess({ id, ...newProcess });
   };
 
@@ -103,6 +105,9 @@ export function ProcessInput() {
         <div className="flex-none flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-white flex items-center gap-2">
             <Users className="w-4 h-4 text-zinc-400" /> Process Queue
+            <span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-full ml-1">
+              {processes.length}
+            </span>
           </h2>
           {processes.length > 0 && (
             <button 
