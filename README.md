@@ -1,6 +1,10 @@
 # OS Simulator Pro: Interactive CPU Scheduling & MLFQ Visualizer
 
-An advanced, interactive web-based simulator designed to visualize Operating System CPU Scheduling algorithms. This project provides a dynamic, animated environment to understand how different scheduling policies affect process execution, waiting times, and CPU utilization.
+An advanced, interactive web-based simulator designed to visualize Operating System CPU Scheduling algorithms. 
+
+> **🎓 Academic Project:** Developed as part of the Semester 5 Operating Systems Course.
+
+This project provides a dynamic, animated environment to understand how different scheduling policies affect process execution, waiting times, and CPU utilization.
 
 ## 🚀 Features
 
