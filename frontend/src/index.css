@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+body {
+  background-color: #000000;
+  color: #fafafa;
+  min-height: 100vh;
+}
+
+/* Custom scrollbar for queues */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #27272a;
+  border-radius: 20px;
+}
