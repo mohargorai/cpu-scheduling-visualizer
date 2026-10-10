@@ -41,15 +41,15 @@ function App() {
   };
 
   return (
-    <div className="h-screen w-screen p-4 flex flex-col font-sans selection:bg-zinc-800 text-zinc-100 bg-black overflow-hidden box-border">
+    <div className="min-h-screen xl:h-screen w-full p-2 sm:p-4 flex flex-col font-sans selection:bg-zinc-800 text-zinc-100 bg-black xl:overflow-hidden box-border overflow-x-hidden">
       
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex-none flex items-center justify-between gap-6 mb-4 p-4 px-6 bg-zinc-950 rounded-xl border border-zinc-900 shadow-lg"
+        className="flex-none flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mb-4 p-4 px-6 bg-zinc-950 rounded-xl border border-zinc-900 shadow-lg"
       >
-        <div className="flex items-center gap-4">
-          <div className="p-2.5 bg-zinc-900 rounded-lg border border-zinc-800">
+        <div className="flex items-center gap-4 w-full sm:w-auto justify-start">
+          <div className="p-2.5 bg-zinc-900 rounded-lg border border-zinc-800 hidden sm:block">
             <Cpu className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -63,24 +63,24 @@ function App() {
           whileTap={{ scale: 0.98 }}
           onClick={runSimulation}
           disabled={loading || processes.length === 0}
-          className="flex items-center justify-center gap-2 bg-white text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
         >
           {loading ? <RotateCcw className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
           <span className="text-sm">{loading ? 'Simulating...' : 'Run Simulation'}</span>
         </motion.button>
       </motion.header>
 
-      <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-12 gap-4">
+      <div className="flex-1 flex flex-col xl:grid xl:grid-cols-12 gap-4 min-h-0 pb-4 xl:pb-0">
         
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="xl:col-span-4 h-full flex flex-col min-h-0"
+          className="xl:col-span-4 h-[550px] xl:h-full flex flex-col min-h-0"
         >
           <ProcessInput />
         </motion.div>
 
-        <div className="xl:col-span-8 h-full flex flex-col min-h-0">
+        <div className="xl:col-span-8 flex flex-col min-h-0">
           <AnimatePresence mode="wait">
             {simulationResult ? (
               <motion.div 
@@ -90,8 +90,8 @@ function App() {
                 animate="show"
                 className="flex flex-col gap-4 h-full min-h-0"
               >
-                <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <motion.div variants={itemVariants} className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col h-full min-h-0">
+                <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 xl:flex-1 xl:min-h-0">
+                  <motion.div variants={itemVariants} className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col h-[400px] xl:h-full min-h-0">
                     <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                       Execution Timeline
                     </h2>
@@ -100,7 +100,7 @@ function App() {
                     </div>
                   </motion.div>
                   
-                  <motion.div variants={itemVariants} className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col h-full min-h-0">
+                  <motion.div variants={itemVariants} className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col h-[400px] xl:h-full min-h-0">
                     <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                       Live Queues & States
                     </h2>
@@ -110,7 +110,7 @@ function App() {
                   </motion.div>
                 </div>
 
-                <motion.div variants={itemVariants} className="flex-[1.2] min-h-0 bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col">
+                <motion.div variants={itemVariants} className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col h-[500px] xl:flex-[1.2] xl:min-h-0">
                   <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                     Comparative Analytics
                   </h2>
@@ -126,7 +126,7 @@ function App() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="h-full flex flex-col items-center justify-center text-zinc-500 bg-zinc-950 rounded-xl border border-zinc-900 p-12 text-center"
+                className="h-[400px] xl:h-full flex flex-col items-center justify-center text-zinc-500 bg-zinc-950 rounded-xl border border-zinc-900 p-12 text-center"
               >
                 <div className="p-6 bg-zinc-900 rounded-full mb-6 border border-zinc-800">
                   <Layers className="w-12 h-12 text-zinc-600" />
