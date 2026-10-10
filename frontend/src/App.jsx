@@ -5,7 +5,7 @@ import { GanttChart } from './components/GanttChart';
 import { MetricsPanel } from './components/MetricsPanel';
 import { ProcessInput } from './components/ProcessInput';
 import { QueueVisualizer } from './components/QueueVisualizer';
-import { Play, RotateCcw, Cpu, Layers } from 'lucide-react';
+import { Play, Loader2, Cpu, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
@@ -65,7 +65,7 @@ function App() {
           disabled={loading || processes.length === 0}
           className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
         >
-          {loading ? <RotateCcw className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
+          {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
           <span className="text-sm">{loading ? 'Simulating...' : 'Run Simulation'}</span>
         </motion.button>
       </motion.header>
