@@ -106,7 +106,7 @@ export function ProcessInput() {
         
         <div className="flex-1 overflow-y-auto mb-4 pr-1 custom-scrollbar min-h-0">
           <AnimatePresence initial={false}>
-            {processes.map(p => {
+            {processes.slice(0, 50).map(p => {
               const isLarge = processes.length > 50;
               const content = (
                 <>
@@ -159,6 +159,11 @@ export function ProcessInput() {
                 </motion.div>
               );
             })}
+            {processes.length > 50 && (
+              <div className="text-center py-3 text-xs font-semibold text-zinc-500 uppercase tracking-widest bg-zinc-900/30 rounded-lg border border-dashed border-zinc-800">
+                + {processes.length - 50} more processes loaded
+              </div>
+            )}
           </AnimatePresence>
           {processes.length === 0 && (
             <motion.div 

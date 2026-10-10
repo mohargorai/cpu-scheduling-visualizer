@@ -43,12 +43,17 @@ export function GanttChart({ trace }) {
   };
 
   return (
-    <div className="w-full h-full min-h-[250px] bg-zinc-900/30 rounded-lg border border-zinc-800/50 overflow-y-auto custom-scrollbar">
-      <div style={{ height: Math.max(250, data.length * 28), padding: '8px' }}>
+    <div className="w-full h-full min-h-[250px] bg-zinc-900/30 rounded-lg border border-zinc-800/50 overflow-y-auto custom-scrollbar relative">
+      {data.length > 300 && (
+        <div className="absolute top-2 right-4 z-10 text-[10px] font-bold tracking-widest text-zinc-500 uppercase bg-black/50 px-2 py-1 rounded backdrop-blur-sm border border-zinc-800">
+          Showing first 300 timeline events
+        </div>
+      )}
+      <div style={{ height: Math.max(250, Math.min(data.length, 300) * 28), padding: '8px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             layout="vertical"
-            data={data}
+            data={data.slice(0, 300)}
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={false} />
@@ -56,7 +61,7 @@ export function GanttChart({ trace }) {
             <YAxis dataKey="name" type="category" stroke="#71717a" tickLine={false} axisLine={false} width={60} tick={{fontWeight: '500', fill: '#d4d4d8', fontSize: 12}} />
             <Tooltip content={<CustomTooltip />} cursor={{fill: '#18181b', opacity: 0.5}} />
             <Bar dataKey="duration" radius={[2, 2, 2, 2]} barSize={20} isAnimationActive={false}>
-              {data.map((entry, index) => (
+              {data.slice(0, 300).map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={getColor(entry.name)} />
               ))}
             </Bar>
