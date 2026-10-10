@@ -100,9 +100,19 @@ export function ProcessInput() {
       </div>
 
       <div className="flex-1 flex flex-col min-h-0">
-        <h2 className="flex-none text-sm font-semibold text-white mb-3 flex items-center gap-2">
-          <Users className="w-4 h-4 text-zinc-400" /> Process Queue
-        </h2>
+        <div className="flex-none flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <Users className="w-4 h-4 text-zinc-400" /> Process Queue
+          </h2>
+          {processes.length > 0 && (
+            <button 
+              onClick={() => setProcesses([])}
+              className="text-[10px] uppercase tracking-wider font-semibold text-red-500/80 hover:text-red-400 transition-colors flex items-center gap-1"
+            >
+              <Trash2 className="w-3 h-3" /> Clear All
+            </button>
+          )}
+        </div>
         
         <div className="flex-1 overflow-y-auto mb-4 pr-1 custom-scrollbar min-h-0">
           <AnimatePresence initial={false}>
