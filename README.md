@@ -1,10 +1,22 @@
-# OS Simulator Pro: Interactive CPU Scheduling & MLFQ Visualizer
+<div align="center">
+  
+  <h1><a href="https://os-simulator-fjco.onrender.com/" target="_blank">OS Simulator Pro</a></h1>
 
-An advanced, interactive web-based simulator designed to visualize Operating System CPU Scheduling algorithms. 
+  <p><strong>An advanced, interactive web-based simulator designed to visualize Operating System CPU Scheduling algorithms.</strong></p>
 
-> **🎓 Academic Project:** Developed as part of the Semester 5 Operating Systems Course.
+  <p>
+    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+    <img src="https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
+    <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js" />
+  </p>
+  
+  <p>🎓 <strong>Academic Project:</strong> Developed as part of the Semester 5 Operating Systems Course.</p>
 
-This project provides a dynamic, animated environment to understand how different scheduling policies affect process execution, waiting times, and CPU utilization.
+</div>
+
+<br />
 
 ## 🚀 Features
 
