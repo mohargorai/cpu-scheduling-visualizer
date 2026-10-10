@@ -14,7 +14,12 @@ export function ProcessInput() {
     const lastProcess = processes[processes.length - 1];
     const newIdNum = lastProcess ? (parseInt(lastProcess.id.replace('P', '')) || processes.length) + 1 : 1;
     const id = `P${newIdNum}`;
-    addProcess({ id, ...newProcess });
+    addProcess({ 
+      id, 
+      arrivalTime: parseInt(newProcess.arrivalTime) || 0,
+      burstTime: parseInt(newProcess.burstTime) || 1,
+      priority: parseInt(newProcess.priority) || 1
+    });
   };
 
   const handleFileUpload = (e) => {
@@ -93,8 +98,8 @@ export function ProcessInput() {
               <input 
                 type="number" min="1" 
                 className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-white outline-none font-medium transition-colors"
-                value={config.timeQuantum}
-                onChange={(e) => setConfig({ timeQuantum: parseInt(e.target.value) || 1 })}
+                value={config.timeQuantum === '' ? '' : config.timeQuantum}
+                onChange={(e) => setConfig({ timeQuantum: e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1) })}
               />
             </motion.div>
           )}
@@ -196,15 +201,15 @@ export function ProcessInput() {
           <div className="grid grid-cols-3 gap-2.5 mb-3">
             <div>
               <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Arrival</label>
-              <input type="number" min="0" value={newProcess.arrivalTime} onChange={e => setNewProcess({...newProcess, arrivalTime: parseInt(e.target.value)||0})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="0" value={newProcess.arrivalTime} onChange={e => setNewProcess({...newProcess, arrivalTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
               <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Burst</label>
-              <input type="number" min="1" value={newProcess.burstTime} onChange={e => setNewProcess({...newProcess, burstTime: parseInt(e.target.value)||1})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="1" value={newProcess.burstTime} onChange={e => setNewProcess({...newProcess, burstTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
               <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Priority</label>
-              <input type="number" min="1" value={newProcess.priority} onChange={e => setNewProcess({...newProcess, priority: parseInt(e.target.value)||1})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="1" value={newProcess.priority} onChange={e => setNewProcess({...newProcess, priority: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
           </div>
           
