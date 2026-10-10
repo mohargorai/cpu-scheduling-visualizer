@@ -80,7 +80,18 @@ export function ProcessInput() {
                 value={algorithm}
                 onChange={(e) => setAlgorithm(e.target.value)}
               >
-                {algorithms.map(alg => <option key={alg} value={alg}>{alg}</option>)}
+                {algorithms.map(alg => {
+                  const algNames = {
+                    'FCFS': 'First-Come, First-Served (FCFS)',
+                    'SJF': 'Shortest Job First (SJF)',
+                    'SRTF': 'Shortest Remaining Time (SRTF)',
+                    'RR': 'Round Robin (RR)',
+                    'Priority': 'Priority (Non-Preemptive)',
+                    'PreemptivePriority': 'Priority (Preemptive)',
+                    'MLFQ': 'Multi-Level Feedback Queue (MLFQ)'
+                  };
+                  return <option key={alg} value={alg}>{algNames[alg]}</option>;
+                })}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -201,15 +212,15 @@ export function ProcessInput() {
           <div className="grid grid-cols-3 gap-2.5 mb-3">
             <div>
               <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Arrival</label>
-              <input type="number" min="0" value={newProcess.arrivalTime} onChange={e => setNewProcess({...newProcess, arrivalTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="0" value={newProcess.arrivalTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({...newProcess, arrivalTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
               <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Burst</label>
-              <input type="number" min="1" value={newProcess.burstTime} onChange={e => setNewProcess({...newProcess, burstTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="1" value={newProcess.burstTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({...newProcess, burstTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
               <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Priority</label>
-              <input type="number" min="1" value={newProcess.priority} onChange={e => setNewProcess({...newProcess, priority: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="1" value={newProcess.priority} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({...newProcess, priority: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
           </div>
           
