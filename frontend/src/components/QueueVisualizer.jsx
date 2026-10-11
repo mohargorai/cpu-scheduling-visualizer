@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, SkipBack, SkipForward, StepBack, StepForward } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, StepBack, StepForward, Cpu } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export function QueueVisualizer({ trace, processes }) {
+export function QueueVisualizer({ trace }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
@@ -11,19 +11,20 @@ export function QueueVisualizer({ trace, processes }) {
   useEffect(() => {
     let interval;
     if (isPlaying && currentTime < maxTime) {
-      // Original base speed: 1 tick every 500ms
       const tickDurationMs = 500 / speedMultiplier;
-      
-      // Cap browser re-renders at ~20fps (50ms interval) to prevent UI thread lag.
-      // If we need to go faster than 50ms per tick, we increase the step size instead.
       const intervalTime = Math.max(50, tickDurationMs);
       const step = Math.max(1, Math.round(intervalTime / tickDurationMs));
 
       interval = setInterval(() => {
-        setCurrentTime(t => Math.min(t + step, maxTime));
+        setCurrentTime((t) => {
+          const next = t + step;
+          if (next >= maxTime) {
+            setIsPlaying(false);
+            return maxTime;
+          }
+          return next;
+        });
       }, intervalTime);
-    } else if (currentTime >= maxTime) {
-      setIsPlaying(false);
     }
     return () => clearInterval(interval);
   }, [isPlaying, currentTime, maxTime, speedMultiplier]);

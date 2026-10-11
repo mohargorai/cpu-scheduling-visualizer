@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function CountUp({ value, decimals = 0, duration = 1000 }) {
   const [count, setCount] = useState(0);
+  const prevValueRef = useRef(0);
 
   useEffect(() => {
     let startTimestamp = null;
     let animationFrameId;
-    const startValue = count;
+    const startValue = prevValueRef.current;
+    prevValueRef.current = value;
     
     const step = (timestamp) => {
       if (!startTimestamp) startTimestamp = timestamp;
@@ -38,11 +40,13 @@ function CountUp({ value, decimals = 0, duration = 1000 }) {
 
 export function MetricsPanel({ metrics, avg }) {
   const [page, setPage] = useState(0);
+  const [prevMetrics, setPrevMetrics] = useState(metrics);
   const pageSize = 30; // 30 processes max per page to guarantee silky smooth animations
 
-  useEffect(() => {
+  if (prevMetrics !== metrics) {
+    setPrevMetrics(metrics);
     setPage(0);
-  }, [metrics]);
+  }
 
   const totalPages = Math.ceil(metrics.length / pageSize);
   const displayMetrics = metrics.slice(page * pageSize, (page + 1) * pageSize);

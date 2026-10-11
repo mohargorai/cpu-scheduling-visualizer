@@ -1,18 +1,50 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+const colors = ['#e4e4e7', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a'];
+
+const getColor = (processId) => {
+  if (processId === 'IDLE') return '#18181b';
+  const num = parseInt(processId.replace('P', '')) || 0;
+  return colors[num % colors.length];
+};
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const d = payload[0].payload;
+    return (
+      <div className="bg-zinc-950 border border-zinc-800 p-3 rounded-lg shadow-xl text-sm min-w-[140px]">
+        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-zinc-900">
+          <div className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: getColor(d.name)}}></div>
+          <p className="font-semibold text-white">{d.name === 'IDLE' ? 'CPU Idle' : `Process ${d.name}`}</p>
+        </div>
+        <div className="space-y-1 text-zinc-400 text-xs">
+          <p className="flex justify-between"><span>Start:</span> <span className="text-zinc-200">{d.start} ms</span></p>
+          <p className="flex justify-between"><span>End:</span> <span className="text-zinc-200">{d.end} ms</span></p>
+          <p className="flex justify-between font-medium"><span>Duration:</span> <span className="text-white">{d.duration} ms</span></p>
+          {d.queue !== undefined && <p className="flex justify-between text-zinc-500 pt-1"><span>Queue:</span> <span>Q{d.queue}</span></p>}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export function GanttChart({ trace }) {
   const [page, setPage] = useState(0);
+  const [prevTrace, setPrevTrace] = useState(trace);
   const pageSize = 100;
 
-  useEffect(() => {
+  if (prevTrace !== trace) {
+    setPrevTrace(trace);
     setPage(0);
-  }, [trace]);
-
-  if (!trace || trace.length === 0) return <div className="text-zinc-600 h-full flex items-center justify-center font-medium">No trace available</div>;
+  }
 
   const { totalPages, displayData } = useMemo(() => {
+    if (!trace || trace.length === 0) {
+      return { totalPages: 0, displayData: [] };
+    }
     const data = [];
     for (let i = 0; i < trace.length; i++) {
       const t = trace[i];
@@ -38,34 +70,7 @@ export function GanttChart({ trace }) {
     };
   }, [trace, page]);
 
-  // Muted minimal colors
-  const colors = ['#e4e4e7', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a'];
-  const getColor = (processId) => {
-    if (processId === 'IDLE') return '#18181b';
-    const num = parseInt(processId.replace('P', '')) || 0;
-    return colors[num % colors.length];
-  };
-
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const d = payload[0].payload;
-      return (
-        <div className="bg-zinc-950 border border-zinc-800 p-3 rounded-lg shadow-xl text-sm min-w-[140px]">
-          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-zinc-900">
-            <div className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: getColor(d.name)}}></div>
-            <p className="font-semibold text-white">{d.name === 'IDLE' ? 'CPU Idle' : `Process ${d.name}`}</p>
-          </div>
-          <div className="space-y-1 text-zinc-400 text-xs">
-            <p className="flex justify-between"><span>Start:</span> <span className="text-zinc-200">{d.start} ms</span></p>
-            <p className="flex justify-between"><span>End:</span> <span className="text-zinc-200">{d.end} ms</span></p>
-            <p className="flex justify-between font-medium"><span>Duration:</span> <span className="text-white">{d.duration} ms</span></p>
-            {d.queue !== undefined && <p className="flex justify-between text-zinc-500 pt-1"><span>Queue:</span> <span>Q{d.queue}</span></p>}
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
+  if (!trace || trace.length === 0) return <div className="text-zinc-600 h-full flex items-center justify-center font-medium">No trace available</div>;
 
   return (
     <div className="w-full h-full min-h-[250px] bg-zinc-900/30 rounded-lg border border-zinc-800/50 overflow-y-auto custom-scrollbar relative flex flex-col">
