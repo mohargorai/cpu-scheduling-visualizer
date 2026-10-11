@@ -184,5 +184,4 @@ $$\text{CPU Utilization (\%)} = \left( \frac{\text{Total Simulation Time} - \tex
 - **MongoDB & Mongoose (Optional):** Document schema modeling for persisting historical simulation logs.
 
 ### 6.3 Tooling & Build Environment
-- **Microsoft Edge Headless Engine:** Native PDF documentation generation via `--print-to-pdf`.
 - **Git & GitHub:** Distributed version control and remote deployment tracking.
