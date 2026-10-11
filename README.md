@@ -13,6 +13,7 @@
   </p>
   
   <p>🎓 <strong>Academic Project:</strong> Developed as part of the Semester 5 Operating Systems Course.</p>
+  <p>👥 <strong>Team Members:</strong> Mohar Gorai (24BIT0462) • Devkanti Sarkar (24BIT0162) • Agrima Gupta (24BIT0253)</p>
 
 </div>
 

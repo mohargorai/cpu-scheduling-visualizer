@@ -3,7 +3,11 @@
 **Document Status:** Complete & Verified  
 **Project:** CPU Scheduling & Multi-Level Feedback Queue (MLFQ) Visualizer  
 **Target Environment:** Node.js, Express, React, Vite, Tailwind CSS  
-**Repository:** [github.com/mohargorai/cpu-scheduling-visualizer](https://github.com/mohargorai/cpu-scheduling-visualizer)
+**Repository:** [github.com/mohargorai/cpu-scheduling-visualizer](https://github.com/mohargorai/cpu-scheduling-visualizer)  
+**Project Team:**
+- **Mohar Gorai** (24BIT0462)
+- **Devkanti Sarkar** (24BIT0162)
+- **Agrima Gupta** (24BIT0253)
 
 ---
 
