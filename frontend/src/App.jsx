@@ -73,8 +73,8 @@ function App() {
             <Cpu className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight leading-tight">OS Simulator</h1>
-            <p className="text-zinc-500 font-medium text-xs mt-0.5">Interactive CPU Scheduling Visualizer</p>
+            <h1 className="text-xl font-bold text-white tracking-tight leading-tight">CPU Scheduling & MLFQ Visualizer</h1>
+            <p className="text-zinc-500 font-medium text-xs mt-0.5">Interactive Process Dispatch & Execution Simulator</p>
           </div>
         </div>
 
