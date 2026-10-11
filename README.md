@@ -1,6 +1,6 @@
 <div align="center">
   
-  <h1><a href="https://os-simulator-fjco.onrender.com/" target="_blank">OS Simulator</a></h1>
+  <h1><a href="https://os-simulator-fjco.onrender.com/" target="_blank">CPU Scheduling</a></h1>
 
   <p><strong>An advanced, interactive web-based simulator designed to visualize Operating System CPU Scheduling algorithms.</strong></p>
 
