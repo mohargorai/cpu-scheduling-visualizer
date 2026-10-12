@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useStore } from '../store';
-import { Plus, Trash2, Users, Activity, Upload, Settings } from 'lucide-react';
+import { Plus, Trash2, Users, Activity, Upload, Settings, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const algorithms = ['FCFS', 'SJF', 'SRTF', 'RR', 'Priority', 'PreemptivePriority', 'MLQ', 'MLFQ'];
@@ -9,6 +9,49 @@ export function ProcessInput() {
   const { processes, algorithm, config, setAlgorithm, setConfig, addProcess, removeProcess, setProcesses } = useStore();
   const [newProcess, setNewProcess] = useState({ arrivalTime: 0, burstTime: 5, priority: 1 });
   const fileInputRef = useRef(null);
+
+  const totalBurst = processes.reduce((acc, p) => acc + (p.burstTime || 0), 0);
+
+  const loadStandardMix = () => {
+    setProcesses([
+      { id: 'P1', arrivalTime: 0, burstTime: 5, priority: 2 },
+      { id: 'P2', arrivalTime: 1, burstTime: 3, priority: 1 },
+      { id: 'P3', arrivalTime: 2, burstTime: 8, priority: 3 },
+      { id: 'P4', arrivalTime: 4, burstTime: 6, priority: 2 },
+      { id: 'P5', arrivalTime: 6, burstTime: 4, priority: 1 }
+    ]);
+  };
+
+  const loadMultiQueueMix = () => {
+    setProcesses([
+      { id: 'P1', arrivalTime: 0, burstTime: 4, priority: 1 },
+      { id: 'P2', arrivalTime: 1, burstTime: 12, priority: 3 },
+      { id: 'P3', arrivalTime: 3, burstTime: 6, priority: 2 },
+      { id: 'P4', arrivalTime: 5, burstTime: 2, priority: 1 },
+      { id: 'P5', arrivalTime: 8, burstTime: 16, priority: 3 },
+      { id: 'P6', arrivalTime: 10, burstTime: 8, priority: 2 }
+    ]);
+  };
+
+  const loadPriorityTiersMix = () => {
+    setProcesses([
+      { id: 'P1', arrivalTime: 0, burstTime: 10, priority: 4 },
+      { id: 'P2', arrivalTime: 2, burstTime: 2, priority: 1 },
+      { id: 'P3', arrivalTime: 4, burstTime: 5, priority: 2 },
+      { id: 'P4', arrivalTime: 6, burstTime: 3, priority: 1 },
+      { id: 'P5', arrivalTime: 8, burstTime: 7, priority: 3 }
+    ]);
+  };
+
+  const generateRandomWorkload = () => {
+    const randomProcs = Array.from({ length: 10 }, (_, i) => ({
+      id: `P${i + 1}`,
+      arrivalTime: Math.floor(Math.random() * 12),
+      burstTime: Math.floor(Math.random() * 12) + 2,
+      priority: Math.floor(Math.random() * 3) + 1
+    })).sort((a, b) => a.arrivalTime - b.arrivalTime);
+    setProcesses(randomProcs);
+  };
 
   const handleAdd = () => {
     const lastProcess = processes[processes.length - 1];
@@ -65,7 +108,7 @@ export function ProcessInput() {
   };
 
   return (
-    <div className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-full xl:h-[760px] min-h-0">
+    <div className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-full min-h-0">
       <div className="flex-none mb-4">
         <h2 className="text-sm font-semibold text-white flex items-center gap-2 mb-3">
           <Settings className="w-4 h-4 text-zinc-400" /> System Configuration
@@ -220,7 +263,7 @@ export function ProcessInput() {
           )}
         </div>
         
-        <div className="flex-1 min-h-[100px] max-h-[240px] overflow-y-auto mb-2.5 pr-1 custom-scrollbar">
+        <div className="flex-1 min-h-[140px] overflow-y-auto mb-2.5 pr-1 custom-scrollbar">
           <AnimatePresence initial={false}>
             {processes.slice(0, 50).map(p => {
               const isLarge = processes.length > 50;
@@ -293,7 +336,7 @@ export function ProcessInput() {
           )}
         </div>
 
-        <div className="flex-none bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/80">
+        <div className="flex-none bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/80 mb-3">
           <div className="grid grid-cols-3 gap-2.5 mb-3">
             <div>
               <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Arrival</label>
@@ -333,6 +376,57 @@ export function ProcessInput() {
             >
               <Upload className="w-3.5 h-3.5" /> Import Dataset
             </motion.button>
+          </div>
+        </div>
+
+        {/* Quick Workload Presets & Workload Summary */}
+        <div className="flex-none bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/80">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500 flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-zinc-400" />
+              Quick Workload Presets
+            </span>
+            <span className="text-[9px] font-semibold text-zinc-500">
+              Total Burst: {totalBurst} ms
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-1.5">
+            <button
+              type="button"
+              onClick={loadStandardMix}
+              className="text-left p-1.5 rounded bg-zinc-950/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            >
+              <p className="text-[11px] font-bold">Balanced Mix</p>
+              <p className="text-[9px] text-zinc-500">5 procs (bursts 3-8ms)</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={loadMultiQueueMix}
+              className="text-left p-1.5 rounded bg-zinc-950/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            >
+              <p className="text-[11px] font-bold">Interactive & Batch</p>
+              <p className="text-[9px] text-zinc-500">MLQ / MLFQ tier demo</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={loadPriorityTiersMix}
+              className="text-left p-1.5 rounded bg-zinc-950/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            >
+              <p className="text-[11px] font-bold">Priority Tiers</p>
+              <p className="text-[9px] text-zinc-500">Varied priorities P1-P4</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={generateRandomWorkload}
+              className="text-left p-1.5 rounded bg-zinc-950/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            >
+              <p className="text-[11px] font-bold">Random 10 Procs</p>
+              <p className="text-[9px] text-zinc-500">Randomized workload</p>
+            </button>
           </div>
         </div>
       </div>

@@ -167,17 +167,17 @@ function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.2 }}
-            className="flex-1 flex flex-col xl:grid xl:grid-cols-12 gap-5 pb-6"
+            className="flex-1 flex flex-col xl:grid xl:grid-cols-12 gap-5 pb-6 items-stretch"
           >
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="xl:col-span-4 flex flex-col min-h-0"
+              className="xl:col-span-4 flex flex-col h-full min-h-0"
             >
               <ProcessInput />
             </motion.div>
 
-            <div className="xl:col-span-8 flex flex-col min-h-0">
+            <div className="xl:col-span-8 flex flex-col min-h-0 h-full">
               <AnimatePresence mode="wait">
                 {simulationResult ? (
                   <motion.div 
@@ -242,7 +242,7 @@ function App() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="h-[400px] xl:h-[760px] flex flex-col items-center justify-center text-zinc-500 bg-zinc-950 rounded-xl border border-zinc-900 p-12 text-center"
+                    className="h-[400px] xl:h-full min-h-[500px] flex flex-col items-center justify-center text-zinc-500 bg-zinc-950 rounded-xl border border-zinc-900 p-12 text-center"
                   >
                     <div className="p-6 bg-zinc-900 rounded-full mb-6 border border-zinc-800">
                       <Layers className="w-12 h-12 text-zinc-600" />
