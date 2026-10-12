@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { useStore } from '../store';
-import { Plus, Trash2, Users, Activity, Upload, Settings, Cpu, Shuffle } from 'lucide-react';
+import { Plus, Trash2, Users, Activity, Upload, Settings, Cpu, Shuffle, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const algorithms = ['FCFS', 'SJF', 'SRTF', 'RR', 'Priority', 'PreemptivePriority', 'MLQ', 'MLFQ'];
@@ -430,10 +430,19 @@ export function ProcessInput() {
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
-              className="flex flex-col items-center justify-center text-zinc-600 p-6 border border-dashed border-zinc-800 rounded-lg h-full min-h-[100px]"
+              className="flex flex-col items-center justify-center text-zinc-500 p-4 border border-dashed border-zinc-800 rounded-lg h-full min-h-[110px] text-center"
             >
-              <Activity className="w-5 h-5 mb-1.5 opacity-50" />
-              <p className="text-xs font-medium">Empty Queue</p>
+              <Activity className="w-5 h-5 mb-1.5 opacity-40 text-zinc-400" />
+              <p className="text-xs font-medium text-zinc-400 mb-2">Process Queue is Empty</p>
+              <button
+                type="button"
+                onClick={generateRandomWorkload}
+                className="px-2.5 py-1 text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded border border-zinc-700 flex items-center gap-1.5 transition-colors shadow-sm"
+                title={`Generate 10 processes tailored for ${algorithm}`}
+              >
+                <Shuffle className="w-3 h-3 text-zinc-400" />
+                <span>Load 10 Sample Processes</span>
+              </button>
             </motion.div>
           )}
         </div>
@@ -524,20 +533,35 @@ export function ProcessInput() {
             </p>
           </div>
 
-          <div className="flex items-center justify-between pt-0.5">
-            <span className="text-xs text-zinc-400 font-medium truncate pr-2">
-              Optimal For: <span className="text-zinc-200 font-semibold">{algorithmInfo.target}</span>
-            </span>
-            <button
-              type="button"
-              onClick={generateRandomWorkload}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white transition-colors border border-zinc-700 shrink-0"
-              title={`Generate 10 processes suited for ${algorithm}`}
-            >
-              <Shuffle className="w-3 h-3" />
-              <span>Random 10 ({algorithm})</span>
-            </button>
+          <div 
+            className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 text-left group transition-colors hover:border-zinc-700 cursor-help"
+            title={`Optimal Workload Target: ${algorithmInfo.target}`}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Target className="w-3 h-3 text-zinc-400" />
+                Optimal Workload Target
+              </span>
+              <span className="text-[9px] font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                Hover info
+              </span>
+            </div>
+            <p className="text-xs text-zinc-200 font-medium leading-relaxed">
+              {algorithmInfo.target}
+            </p>
           </div>
+
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            onClick={generateRandomWorkload}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white transition-all border border-zinc-700 shadow-sm"
+            title={`Generate 10 random processes tailored for ${algorithm === 'PreemptivePriority' ? 'Preemptive Priority' : algorithm}`}
+          >
+            <Shuffle className="w-3.5 h-3.5 text-zinc-300" />
+            <span>Generate 10 Workload ({algorithm === 'PreemptivePriority' ? 'Priority (P)' : algorithm})</span>
+          </motion.button>
         </div>
       </div>
     </div>
