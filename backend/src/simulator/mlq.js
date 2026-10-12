@@ -70,6 +70,23 @@ function simulateMLQ(processes, quanta = [2, 4]) {
     let completedCount = 0;
     const n = processes.length;
     let processIndex = 0;
+    let completedProcs = [];
+    let queueSnapshots = [];
+
+    function recordSnapshot(t, cpuProc, queueLvl, eventMsg) {
+        if (queueSnapshots.length > 2500) return;
+        queueSnapshots.push({
+            time: t,
+            cpu: cpuProc ? { id: cpuProc.id, queue: queueLvl, remainingTime: cpuProc.remainingTime, priority: cpuProc.priority } : null,
+            queues: [
+                queues[0].map(x => ({ id: x.id, remainingTime: x.remainingTime, priority: x.priority })),
+                queues[1].map(x => ({ id: x.id, remainingTime: x.remainingTime, priority: x.priority })),
+                queues[2].map(x => ({ id: x.id, remainingTime: x.remainingTime, priority: x.priority }))
+            ],
+            completed: completedProcs.map(x => x.id),
+            event: eventMsg || ''
+        });
+    }
 
     // Initial arrivals
     while (processIndex < n && procs[processIndex].arrivalTime <= currentTime) {
@@ -121,6 +138,13 @@ function simulateMLQ(processes, quanta = [2, 4]) {
 
             // Execute step-by-step to handle preemption when new higher-priority processes arrive
             for (let t = 1; t <= executeLimit; t++) {
+                recordSnapshot(
+                    currentTime, 
+                    p, 
+                    selectedQueueLevel, 
+                    `${p.id} executing in Queue ${selectedQueueLevel} (${p.remainingTime}ms remaining)`
+                );
+
                 currentTime++;
                 p.remainingTime--;
                 p.timeInCurrentQuantum++;
@@ -156,6 +180,7 @@ function simulateMLQ(processes, quanta = [2, 4]) {
                 // Process terminated
                 p.completionTime = currentTime;
                 completedCount++;
+                completedProcs.push({ id: p.id });
 
                 const turnaroundTime = p.completionTime - p.arrivalTime;
                 const waitingTime = turnaroundTime - p.burstTime;
@@ -224,6 +249,7 @@ function simulateMLQ(processes, quanta = [2, 4]) {
                 burstStart = currentTime;
                 currentQueueLevel = -1;
             }
+            recordSnapshot(currentTime, null, -1, 'CPU Idle - waiting for process arrivals');
             totalIdleTime++;
             currentTime++;
 
@@ -235,6 +261,9 @@ function simulateMLQ(processes, quanta = [2, 4]) {
         }
     }
 
+    // Final completion snapshot
+    recordSnapshot(currentTime, null, -1, 'All processes completed execution');
+
     const totalTime = currentTime;
     const cpuUtilization = totalTime === 0 ? 0 : ((totalTime - totalIdleTime) / totalTime) * 100;
 
@@ -244,7 +273,8 @@ function simulateMLQ(processes, quanta = [2, 4]) {
     return {
         trace: mergeContiguousTrace(trace),
         metrics,
-        averageMetrics: { avgWT, avgTAT, cpuUtilization }
+        averageMetrics: { avgWT, avgTAT, cpuUtilization },
+        queueSnapshots
     };
 }
 

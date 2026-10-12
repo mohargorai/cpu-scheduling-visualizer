@@ -125,7 +125,12 @@ function App() {
                       Live Queues & States
                     </h2>
                     <div className="flex-1 min-h-0">
-                      <QueueVisualizer trace={simulationResult.trace} processes={processes} />
+                      <QueueVisualizer 
+                        trace={simulationResult.trace} 
+                        processes={processes} 
+                        algorithm={algorithm}
+                        simulationResult={simulationResult}
+                      />
                     </div>
                   </motion.div>
                 </div>

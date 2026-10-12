@@ -46,8 +46,20 @@ function simulateMLFQ(processes, quanta = [2, 4, 8], agingThreshold = 10) {
     
     let completedCount = 0;
     const n = processes.length;
-    
     let processIndex = 0;
+    let completedProcs = [];
+    let queueSnapshots = [];
+
+    function recordSnapshot(t, cpuProc, queueLvl, eventMsg) {
+        if (queueSnapshots.length > 2500) return;
+        queueSnapshots.push({
+            time: t,
+            cpu: cpuProc ? { id: cpuProc.id, queue: queueLvl, remainingTime: cpuProc.remainingTime, priority: cpuProc.priority } : null,
+            queues: queues.map(q => q.map(x => ({ id: x.id, remainingTime: x.remainingTime, priority: x.priority }))),
+            completed: completedProcs.map(x => x.id),
+            event: eventMsg || ''
+        });
+    }
     
     // Initial arrivals
     while (processIndex < n && procs[processIndex].arrivalTime <= currentTime) {
@@ -112,6 +124,13 @@ function simulateMLFQ(processes, quanta = [2, 4, 8], agingThreshold = 10) {
             let preemptedByHigherQueue = false;
             
             for (let t = 1; t <= executeTime; t++) {
+                recordSnapshot(
+                    currentTime,
+                    p,
+                    selectedQueueLevel,
+                    `${p.id} running in Queue ${selectedQueueLevel} (${p.remainingTime}ms remaining)`
+                );
+
                 currentTime++;
                 actualExecuted++;
                 p.remainingTime--;
@@ -135,6 +154,7 @@ function simulateMLFQ(processes, quanta = [2, 4, 8], agingThreshold = 10) {
             if (p.remainingTime === 0) {
                 p.completionTime = currentTime;
                 completedCount++;
+                completedProcs.push({ id: p.id });
                 
                 let turnaroundTime = p.completionTime - p.arrivalTime;
                 let waitingTime = turnaroundTime - p.burstTime;
@@ -156,7 +176,7 @@ function simulateMLFQ(processes, quanta = [2, 4, 8], agingThreshold = 10) {
                 currentQueueLevel = -1;
             } else if (preemptedByHigherQueue) {
                 // Preempted by arrival of higher priority process, but hasn't finished quantum yet
-                queues[selectedQueueLevel].push(p);
+                queues[selectedQueueLevel].unshift(p);
                 trace.push({
                     processId: p.id,
                     startTime: burstStart,
@@ -199,6 +219,7 @@ function simulateMLFQ(processes, quanta = [2, 4, 8], agingThreshold = 10) {
                 burstStart = currentTime;
                 currentQueueLevel = -1;
             }
+            recordSnapshot(currentTime, null, -1, 'CPU Idle - waiting for process arrivals');
             totalIdleTime++;
             currentTime++;
             
@@ -209,6 +230,9 @@ function simulateMLFQ(processes, quanta = [2, 4, 8], agingThreshold = 10) {
         }
     }
     
+    // Final completion snapshot
+    recordSnapshot(currentTime, null, -1, 'All processes completed execution');
+
     const totalTime = currentTime;
     const cpuUtilization = totalTime === 0 ? 0 : ((totalTime - totalIdleTime) / totalTime) * 100;
     
@@ -218,7 +242,8 @@ function simulateMLFQ(processes, quanta = [2, 4, 8], agingThreshold = 10) {
     return {
         trace: mergeContiguousTrace(trace),
         metrics,
-        averageMetrics: { avgWT, avgTAT, cpuUtilization }
+        averageMetrics: { avgWT, avgTAT, cpuUtilization },
+        queueSnapshots
     };
 }
 

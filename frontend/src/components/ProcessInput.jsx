@@ -73,26 +73,70 @@ export function ProcessInput() {
         
         <div className="space-y-3 bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/50">
           <div>
-            <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">Scheduling Algorithm</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Scheduling Engine</label>
+              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
+                algorithm === 'MLQ' || algorithm === 'MLFQ' 
+                  ? 'bg-purple-950/80 text-purple-300 border-purple-800' 
+                  : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+              }`}>
+                {algorithm === 'MLQ' || algorithm === 'MLFQ' ? 'Multi-Queue Engine' : 'Standard Unilevel'}
+              </span>
+            </div>
+
+            {/* Category Segmented Selector */}
+            <div className="grid grid-cols-2 gap-1 p-1 bg-zinc-950 rounded-lg border border-zinc-800 mb-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (algorithm === 'MLQ' || algorithm === 'MLFQ') {
+                    setAlgorithm('FCFS');
+                  }
+                }}
+                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
+                  algorithm !== 'MLQ' && algorithm !== 'MLFQ'
+                    ? 'bg-zinc-800 text-white shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                Standard Schedulers
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (algorithm !== 'MLQ' && algorithm !== 'MLFQ') {
+                    setAlgorithm('MLQ');
+                  }
+                }}
+                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1 ${
+                  algorithm === 'MLQ' || algorithm === 'MLFQ'
+                    ? 'bg-purple-600/90 text-white shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                <span>Multi-Queue Engines</span>
+                <span className="text-[10px]">✨</span>
+              </button>
+            </div>
+
             <div className="relative">
               <select 
                 className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-white outline-none appearance-none font-medium transition-colors"
                 value={algorithm}
                 onChange={(e) => setAlgorithm(e.target.value)}
               >
-                {algorithms.map(alg => {
-                  const algNames = {
-                    'FCFS': 'First-Come, First-Served (FCFS)',
-                    'SJF': 'Shortest Job First (SJF)',
-                    'SRTF': 'Shortest Remaining Time (SRTF)',
-                    'RR': 'Round Robin (RR)',
-                    'Priority': 'Priority (Non-Preemptive)',
-                    'PreemptivePriority': 'Priority (Preemptive)',
-                    'MLQ': 'Multilevel Queue (MLQ)',
-                    'MLFQ': 'Multi-Level Feedback Queue (MLFQ)'
-                  };
-                  return <option key={alg} value={alg}>{algNames[alg]}</option>;
-                })}
+                <optgroup label="── Standard Unilevel Schedulers ──" className="bg-zinc-950 font-bold text-zinc-400">
+                  <option value="FCFS" className="bg-zinc-900 text-white font-normal">First-Come, First-Served (FCFS)</option>
+                  <option value="SJF" className="bg-zinc-900 text-white font-normal">Shortest Job First (SJF)</option>
+                  <option value="SRTF" className="bg-zinc-900 text-white font-normal">Shortest Remaining Time (SRTF)</option>
+                  <option value="RR" className="bg-zinc-900 text-white font-normal">Round Robin (RR)</option>
+                  <option value="Priority" className="bg-zinc-900 text-white font-normal">Priority (Non-Preemptive)</option>
+                  <option value="PreemptivePriority" className="bg-zinc-900 text-white font-normal">Priority (Preemptive)</option>
+                </optgroup>
+                <optgroup label="── Multi-Queue Scheduling Engines ──" className="bg-zinc-950 font-bold text-purple-400">
+                  <option value="MLQ" className="bg-zinc-900 text-white font-normal">Multilevel Queue (MLQ)</option>
+                  <option value="MLFQ" className="bg-zinc-900 text-white font-normal">Multi-Level Feedback Queue (MLFQ)</option>
+                </optgroup>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
@@ -106,7 +150,9 @@ export function ProcessInput() {
               animate={{ opacity: 1, height: 'auto' }} 
               exit={{ opacity: 0, height: 0 }}
             >
-              <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">Time Quantum</label>
+              <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
+                {algorithm === 'MLFQ' ? 'Top Queue Quantum (Q₀)' : 'Time Quantum'}
+              </label>
               <input 
                 type="number" min="1" 
                 className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-white outline-none font-medium transition-colors"
@@ -116,17 +162,43 @@ export function ProcessInput() {
             </motion.div>
           )}
 
+          {algorithm === 'MLFQ' && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }} 
+              animate={{ opacity: 1, height: 'auto' }} 
+              exit={{ opacity: 0, height: 0 }}
+              className="text-[11px] text-zinc-400 bg-purple-950/20 p-2.5 rounded-lg border border-purple-900/40 space-y-1.5"
+            >
+              <div className="font-semibold text-purple-200 text-[10px] uppercase tracking-wider flex items-center justify-between">
+                <span>MLFQ Dynamic Feedback Architecture:</span>
+                <span className="text-[9px] text-purple-400 font-normal">3 Dynamic Queues</span>
+              </div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-emerald-400">Q₀</span>: Top Priority Entry Queue (RR q={config.quanta?.[0] || 2})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-cyan-400">Q₁</span>: Intermediate Priority Queue (RR q={config.quanta?.[1] || 4})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-amber-400">Q₂</span>: Background Batch Queue (RR q={config.quanta?.[2] || 8})</div>
+              <div className="text-[9px] text-zinc-400 pt-1 border-t border-purple-900/30">
+                ⚡ Processes demote on quantum expiry; promoted to Q₀ upon aging (10ms wait).
+              </div>
+            </motion.div>
+          )}
+
           {algorithm === 'MLQ' && (
             <motion.div 
               initial={{ opacity: 0, height: 0 }} 
               animate={{ opacity: 1, height: 'auto' }} 
               exit={{ opacity: 0, height: 0 }}
-              className="text-[11px] text-zinc-400 bg-zinc-900/80 p-2.5 rounded-lg border border-zinc-800 space-y-1.5"
+              className="text-[11px] text-zinc-400 bg-blue-950/20 p-2.5 rounded-lg border border-blue-900/40 space-y-1.5"
             >
-              <div className="font-semibold text-zinc-200 text-[10px] uppercase tracking-wider">Queue Partitions (Fixed Priority):</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q0</span> (Priority ≤ 1): Round Robin (Q={config.quanta?.[0] || 2})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q1</span> (Priority = 2): Round Robin (Q={config.quanta?.[1] || 4})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q2</span> (Priority ≥ 3): First-Come First-Served</div>
+              <div className="font-semibold text-blue-200 text-[10px] uppercase tracking-wider flex items-center justify-between">
+                <span>MLQ Priority Partition Architecture:</span>
+                <span className="text-[9px] text-blue-400 font-normal">3 Fixed Queues</span>
+              </div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-emerald-400">Q₀</span> (Priority ≤ 1): Real-Time / System (RR q={config.quanta?.[0] || 2})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-cyan-400">Q₁</span> (Priority = 2): Interactive (RR q={config.quanta?.[1] || 4})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-amber-400">Q₂</span> (Priority ≥ 3): Batch (FCFS)</div>
+              <div className="text-[9px] text-zinc-400 pt-1 border-t border-blue-900/30">
+                🔒 Fixed-priority preemption; processes remain strictly in assigned partitions.
+              </div>
             </motion.div>
           )}
         </div>

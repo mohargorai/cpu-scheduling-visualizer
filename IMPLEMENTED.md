@@ -62,7 +62,7 @@ The application follows a decoupled client-server architecture:
 
 ---
 
-## 2. Core Scheduling Algorithms Implemented
+## 2. Standard Unilevel CPU Scheduling Algorithms
 
 ### 2.1 First-Come, First-Served (FCFS)
 - **Class:** Non-Preemptive
@@ -107,7 +107,11 @@ The application follows a decoupled client-server architecture:
 
 ---
 
-### 2.6 Multilevel Queue (MLQ) Engine
+## 3. Advanced Multi-Queue Scheduling Engines (MLQ & MLFQ)
+
+Unlike unilevel schedulers that manage a single ready queue, modern operating systems partition processes across hierarchical queue tiers. The simulator implements both major multi-queue paradigms with full live visualizer support.
+
+### 3.1 Multilevel Queue (MLQ) Engine
 - **Class:** Preemptive Partitioned Multi-Queue
 - **Concept:** The ready queue is partitioned into permanently separated priority queues based on intrinsic process attributes (Priority / Classification). Unlike MLFQ, processes **never migrate or demote** across queues.
 
@@ -134,7 +138,7 @@ The application follows a decoupled client-server architecture:
 
 ---
 
-### 2.7 Multi-Level Feedback Queue (MLFQ) Engine
+### 3.2 Multi-Level Feedback Queue (MLFQ) Engine
 - **Class:** Preemptive, Adaptive Feedback Multi-Queue
 - **Concept:** Separates processes into multiple priority queues according to runtime CPU behavior and dynamically adjusts priority:
 
@@ -170,7 +174,28 @@ The application follows a decoupled client-server architecture:
 
 ---
 
-## 3. Mathematical Metrics & Formulas
+### 3.3 Live Multi-Queue Visualizer Engine (`QueueVisualizer.jsx`)
+
+The system does not merely present static Gantt charts and analytical graphs; it features a real-time, interactive **Multi-Level Queue Visual Engine** showing step-by-step queue dynamics:
+
+1. **Three Visual Queue Tracks ($Q_0, Q_1, Q_2$):**
+   - Renders live horizontal tracks showing all processes currently waiting in each individual queue tier.
+   - Each waiting process is shown as an animated card with its ID and remaining burst time.
+2. **CPU Execution Core 0:**
+   - Visual hardware slot showing the currently executing process, remaining burst, and a live badge indicating the origin queue tier it was dispatched from.
+   - Pulsing execution ring and status indicator.
+3. **Inter-Queue Dynamics Indicators:**
+   - For **MLFQ**: Visual indicators showing dynamic quantum timeout demotion ($\downarrow$) and aging starvation promotion ($\uparrow$).
+   - For **MLQ**: Visual partition badges showing static priority isolation.
+4. **Interactive Timeline Scrubbing & Event Activity Banner:**
+   - Play/Pause, Step-Backward, and Step-Forward controls allowing users to step millisecond by millisecond through queue migrations and preemption events.
+   - Live activity banner describing exact scheduler events at time $T$ (e.g. `P1 running in Queue 0`, `P1 demoted to Queue 1 after exhausting quantum`, `All processes completed`).
+5. **Terminated Process Tray:**
+   - Displays finished processes in completed state.
+
+---
+
+## 4. Mathematical Metrics & Formulas
 
 For every process $P_i$ with arrival time $A_i$ and burst time $B_i$:
 
@@ -186,7 +211,7 @@ $$\text{CPU Utilization (\%)} = \left( \frac{\text{Total Simulation Time} - \tex
 
 ---
 
-## 4. Frontend Implementation & Components
+## 5. Frontend Implementation & Components
 
 | Component | File Path | Responsibilities & Implementations |
 | :--- | :--- | :--- |
@@ -199,7 +224,7 @@ $$\text{CPU Utilization (\%)} = \left( \frac{\text{Total Simulation Time} - \tex
 
 ---
 
-## 5. Performance Engineering & Optimizations
+## 6. Performance Engineering & Optimizations
 
 1. **O(1) Incremental ID Generation:** Replaced $O(N)$ regex scanning of process IDs with a tracking counter, enabling instantaneous additions even when 5,000+ processes are loaded.
 2. **O(log N) Timeline State Scrubbing:** Implemented binary search over execution trace intervals for instant timeline seek times at 60fps.
@@ -215,7 +240,7 @@ $$\text{CPU Utilization (\%)} = \left( \frac{\text{Total Simulation Time} - \tex
 
 ---
 
-## 6. Complete Technology Stack & Tools Used
+## 7. Complete Technology Stack & Tools Used
 
 ### 6.1 Frontend
 - **React 18:** Modern declarative UI library using functional hooks.
