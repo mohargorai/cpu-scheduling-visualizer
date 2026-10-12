@@ -11,13 +11,80 @@ export function ProcessInput() {
   const fileInputRef = useRef(null);
 
   const generateRandomWorkload = () => {
-    const randomProcs = Array.from({ length: 10 }, (_, i) => ({
-      id: `P${i + 1}`,
-      arrivalTime: Math.floor(Math.random() * 12),
-      burstTime: Math.floor(Math.random() * 12) + 2,
-      priority: Math.floor(Math.random() * 3) + 1
-    })).sort((a, b) => a.arrivalTime - b.arrivalTime);
-    setProcesses(randomProcs);
+    let procs = [];
+
+    if (algorithm === 'MLQ') {
+      // Tailored for MLQ: balanced partition across Q0 (Priority 1), Q1 (Priority 2), Q2 (Priority 3)
+      const qDistribution = [
+        { priority: 1, burstMin: 2, burstMax: 5 },
+        { priority: 1, burstMin: 3, burstMax: 6 },
+        { priority: 1, burstMin: 2, burstMax: 4 },
+        { priority: 2, burstMin: 5, burstMax: 8 },
+        { priority: 2, burstMin: 4, burstMax: 7 },
+        { priority: 2, burstMin: 6, burstMax: 9 },
+        { priority: 2, burstMin: 5, burstMax: 8 },
+        { priority: 3, burstMin: 8, burstMax: 14 },
+        { priority: 3, burstMin: 10, burstMax: 16 },
+        { priority: 3, burstMin: 12, burstMax: 18 },
+      ];
+      procs = qDistribution.map((item, idx) => ({
+        id: `P${idx + 1}`,
+        arrivalTime: Math.floor(Math.random() * 10),
+        burstTime: Math.floor(Math.random() * (item.burstMax - item.burstMin + 1)) + item.burstMin,
+        priority: item.priority
+      }));
+    } else if (algorithm === 'MLFQ') {
+      // Tailored for MLFQ: mix of short jobs (Q0), medium jobs (demote Q1), heavy jobs (demote Q2 + aging)
+      const burstTiers = [2, 3, 4, 5, 6, 8, 10, 14, 18, 22];
+      procs = burstTiers.map((burst, idx) => ({
+        id: `P${idx + 1}`,
+        arrivalTime: Math.floor(Math.random() * 8),
+        burstTime: burst,
+        priority: 1
+      }));
+    } else if (algorithm === 'RR') {
+      // Tailored for RR: varied bursts spanning multiple quantum slices
+      const q = config?.timeQuantum || 2;
+      const bursts = [q, q + 1, q * 2, q * 2 + 1, q * 3, q * 4, q + 2, q * 2 - 1, q * 3 + 2, q * 5];
+      procs = bursts.map((b, idx) => ({
+        id: `P${idx + 1}`,
+        arrivalTime: Math.floor(Math.random() * 8),
+        burstTime: Math.max(1, b),
+        priority: 1
+      }));
+    } else if (algorithm === 'Priority' || algorithm === 'PreemptivePriority') {
+      // Tailored for Priority: varied priorities (P1-P5) arriving over time
+      procs = Array.from({ length: 10 }, (_, idx) => ({
+        id: `P${idx + 1}`,
+        arrivalTime: Math.floor(Math.random() * 10),
+        burstTime: Math.floor(Math.random() * 9) + 2,
+        priority: (idx % 5) + 1
+      }));
+    } else if (algorithm === 'SJF' || algorithm === 'SRTF') {
+      // Tailored for SJF/SRTF: contrast between short quick bursts and long background bursts
+      const sjfBursts = [1, 2, 2, 3, 4, 6, 8, 12, 15, 18];
+      procs = sjfBursts.map((b, idx) => ({
+        id: `P${idx + 1}`,
+        arrivalTime: Math.floor(Math.random() * 10),
+        burstTime: b,
+        priority: 1
+      }));
+    } else {
+      // FCFS: staggered arrival showing convoy effect
+      procs = Array.from({ length: 10 }, (_, idx) => ({
+        id: `P${idx + 1}`,
+        arrivalTime: idx * 2,
+        burstTime: Math.floor(Math.random() * 10) + 2,
+        priority: 1
+      }));
+    }
+
+    procs.sort((a, b) => a.arrivalTime - b.arrivalTime);
+    procs.forEach((p, idx) => {
+      p.id = `P${idx + 1}`;
+    });
+
+    setProcesses(procs);
   };
 
   const algorithmInfo = useMemo(() => {
@@ -465,10 +532,10 @@ export function ProcessInput() {
               type="button"
               onClick={generateRandomWorkload}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white transition-colors border border-zinc-700 shrink-0"
-              title="Generate 10 random processes"
+              title={`Generate 10 processes suited for ${algorithm}`}
             >
               <Shuffle className="w-3 h-3" />
-              <span>Random 10</span>
+              <span>Random 10 ({algorithm})</span>
             </button>
           </div>
         </div>

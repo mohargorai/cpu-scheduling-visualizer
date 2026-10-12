@@ -186,6 +186,7 @@ function simulateMLQ(processes, quanta = [2, 4]) {
                 const waitingTime = turnaroundTime - p.burstTime;
 
                 metrics.push({
+                    id: p.id,
                     processId: p.id,
                     arrivalTime: p.arrivalTime,
                     burstTime: p.burstTime,

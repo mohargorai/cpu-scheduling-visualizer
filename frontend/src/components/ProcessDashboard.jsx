@@ -25,7 +25,8 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
     const metricsMap = {};
     if (simulationResult?.metrics) {
       for (const m of simulationResult.metrics) {
-        metricsMap[m.id] = m;
+        const pId = m.id || m.processId;
+        if (pId) metricsMap[pId] = m;
       }
     }
 
