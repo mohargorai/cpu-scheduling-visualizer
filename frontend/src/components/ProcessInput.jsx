@@ -116,22 +116,25 @@ export function ProcessInput() {
 
             <div className="relative">
               <select 
-                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-white outline-none appearance-none font-medium transition-colors"
+                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-white outline-none appearance-none font-medium transition-colors cursor-pointer"
                 value={algorithm}
                 onChange={(e) => setAlgorithm(e.target.value)}
               >
-                <optgroup label="── Standard Unilevel Schedulers ──" className="bg-zinc-950 font-bold text-zinc-400">
-                  <option value="FCFS" className="bg-zinc-900 text-white font-normal">First-Come, First-Served (FCFS)</option>
-                  <option value="SJF" className="bg-zinc-900 text-white font-normal">Shortest Job First (SJF)</option>
-                  <option value="SRTF" className="bg-zinc-900 text-white font-normal">Shortest Remaining Time (SRTF)</option>
-                  <option value="RR" className="bg-zinc-900 text-white font-normal">Round Robin (RR)</option>
-                  <option value="Priority" className="bg-zinc-900 text-white font-normal">Priority (Non-Preemptive)</option>
-                  <option value="PreemptivePriority" className="bg-zinc-900 text-white font-normal">Priority (Preemptive)</option>
-                </optgroup>
-                <optgroup label="── Multi-Queue Scheduling Engines ──" className="bg-zinc-950 font-bold text-zinc-300">
-                  <option value="MLQ" className="bg-zinc-900 text-white font-normal">Multilevel Queue (MLQ)</option>
-                  <option value="MLFQ" className="bg-zinc-900 text-white font-normal">Multi-Level Feedback Queue (MLFQ)</option>
-                </optgroup>
+                {(algorithm === 'MLQ' || algorithm === 'MLFQ' ? [
+                  { id: 'MLQ', name: 'Multilevel Queue (MLQ)' },
+                  { id: 'MLFQ', name: 'Multi-Level Feedback Queue (MLFQ)' }
+                ] : [
+                  { id: 'FCFS', name: 'First-Come, First-Served (FCFS)' },
+                  { id: 'SJF', name: 'Shortest Job First (SJF)' },
+                  { id: 'SRTF', name: 'Shortest Remaining Time (SRTF)' },
+                  { id: 'RR', name: 'Round Robin (RR)' },
+                  { id: 'Priority', name: 'Priority (Non-Preemptive)' },
+                  { id: 'PreemptivePriority', name: 'Priority (Preemptive)' }
+                ]).map(item => (
+                  <option key={item.id} value={item.id} className="bg-zinc-900 text-white font-normal">
+                    {item.name}
+                  </option>
+                ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
