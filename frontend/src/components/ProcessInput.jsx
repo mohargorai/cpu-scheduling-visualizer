@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useStore } from '../store';
-import { Plus, Trash2, Users, Activity, Upload, Settings, Sparkles, Zap, Shuffle, Layers } from 'lucide-react';
+import { Plus, Trash2, Users, Activity, Upload, Settings, Cpu, Shuffle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const algorithms = ['FCFS', 'SJF', 'SRTF', 'RR', 'Priority', 'PreemptivePriority', 'MLQ', 'MLFQ'];
@@ -9,39 +9,6 @@ export function ProcessInput() {
   const { processes, algorithm, config, setAlgorithm, setConfig, addProcess, removeProcess, setProcesses } = useStore();
   const [newProcess, setNewProcess] = useState({ arrivalTime: 0, burstTime: 5, priority: 1 });
   const fileInputRef = useRef(null);
-
-  const totalBurst = processes.reduce((acc, p) => acc + (p.burstTime || 0), 0);
-
-  const loadStandardMix = () => {
-    setProcesses([
-      { id: 'P1', arrivalTime: 0, burstTime: 5, priority: 2 },
-      { id: 'P2', arrivalTime: 1, burstTime: 3, priority: 1 },
-      { id: 'P3', arrivalTime: 2, burstTime: 8, priority: 3 },
-      { id: 'P4', arrivalTime: 4, burstTime: 6, priority: 2 },
-      { id: 'P5', arrivalTime: 6, burstTime: 4, priority: 1 }
-    ]);
-  };
-
-  const loadMultiQueueMix = () => {
-    setProcesses([
-      { id: 'P1', arrivalTime: 0, burstTime: 4, priority: 1 },
-      { id: 'P2', arrivalTime: 1, burstTime: 12, priority: 3 },
-      { id: 'P3', arrivalTime: 3, burstTime: 6, priority: 2 },
-      { id: 'P4', arrivalTime: 5, burstTime: 2, priority: 1 },
-      { id: 'P5', arrivalTime: 8, burstTime: 16, priority: 3 },
-      { id: 'P6', arrivalTime: 10, burstTime: 8, priority: 2 }
-    ]);
-  };
-
-  const loadPriorityTiersMix = () => {
-    setProcesses([
-      { id: 'P1', arrivalTime: 0, burstTime: 10, priority: 4 },
-      { id: 'P2', arrivalTime: 2, burstTime: 2, priority: 1 },
-      { id: 'P3', arrivalTime: 4, burstTime: 5, priority: 2 },
-      { id: 'P4', arrivalTime: 6, burstTime: 3, priority: 1 },
-      { id: 'P5', arrivalTime: 8, burstTime: 7, priority: 3 }
-    ]);
-  };
 
   const generateRandomWorkload = () => {
     const randomProcs = Array.from({ length: 10 }, (_, i) => ({
@@ -52,6 +19,74 @@ export function ProcessInput() {
     })).sort((a, b) => a.arrivalTime - b.arrivalTime);
     setProcesses(randomProcs);
   };
+
+  const algorithmInfo = useMemo(() => {
+    switch (algorithm) {
+      case 'FCFS':
+        return {
+          mode: 'Non-Preemptive',
+          starvation: 'None (Convoy effect possible)',
+          rules: 'Processes execute uninterrupted until burst completion. First arrived gets the CPU first.',
+          target: 'Batch processing without preemption'
+        };
+      case 'SJF':
+        return {
+          mode: 'Non-Preemptive',
+          starvation: 'High risk for long processes',
+          rules: 'Selects the process with the shortest CPU burst. Cannot be interrupted once scheduled.',
+          target: 'Minimizing average waiting time'
+        };
+      case 'SRTF':
+        return {
+          mode: 'Preemptive',
+          starvation: 'High risk for long processes',
+          rules: 'Interrupts running process if a newly arrived process has a shorter remaining burst.',
+          target: 'Interactive quick turnaround'
+        };
+      case 'RR':
+        return {
+          mode: `Preemptive (q = ${config?.timeQuantum || 2}ms)`,
+          starvation: 'Zero (Guaranteed fair share)',
+          rules: `Each process runs for at most ${config?.timeQuantum || 2}ms before yielding to the queue tail.`,
+          target: 'Time-sharing interactive systems'
+        };
+      case 'Priority':
+        return {
+          mode: 'Non-Preemptive',
+          starvation: 'High for low-priority jobs',
+          rules: 'Dispatches process with the highest priority level (lowest numerical value) to completion.',
+          target: 'Real-time tasks with fixed importance'
+        };
+      case 'PreemptivePriority':
+        return {
+          mode: 'Preemptive Interrupt',
+          starvation: 'High without aging mechanisms',
+          rules: 'Immediately preempts execution whenever a higher-priority process enters ready state.',
+          target: 'Mission-critical event systems'
+        };
+      case 'MLQ':
+        return {
+          mode: 'Inter-Queue Priority',
+          starvation: 'High for lower queues',
+          rules: 'Processes are permanently partitioned into priority lanes (Q₀ > Q₁ > Q₂) with dedicated sub-schedulers.',
+          target: 'Classified foreground & batch jobs'
+        };
+      case 'MLFQ':
+        return {
+          mode: 'Dynamic Feedback',
+          starvation: 'Prevented (10ms Aging Threshold)',
+          rules: 'Quantum exhaustion causes demotion down queues; aging promotes starving processes back to Q₀.',
+          target: 'Modern general-purpose OS kernels'
+        };
+      default:
+        return {
+          mode: 'Standard',
+          starvation: 'Low',
+          rules: 'Executes according to engine criteria.',
+          target: 'General computing'
+        };
+    }
+  }, [algorithm, config?.timeQuantum]);
 
   const handleAdd = () => {
     const lastProcess = processes[processes.length - 1];
@@ -379,65 +414,61 @@ export function ProcessInput() {
           </div>
         </div>
 
-        {/* Quick Workload Presets & Workload Summary */}
-        <div className="flex-none bg-zinc-900/40 p-3.5 rounded-xl border border-zinc-800/80">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs uppercase tracking-wider font-bold text-zinc-300 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-zinc-400" />
-              Quick Workload Presets
-            </span>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700">
-              Total Burst: <strong className="text-white font-bold">{totalBurst} ms</strong>
+        {/* Algorithm Mechanics & Behavior Card */}
+        <div className="flex-none bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 flex flex-col gap-3 shadow-sm">
+          <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800">
+            <div className="flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-white" />
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                Algorithm Mechanics & Rules
+              </h3>
+            </div>
+            <span className="text-xs font-bold px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700">
+              {algorithm}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={loadStandardMix}
-              className="group text-left p-2.5 sm:p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white transition-all shadow-sm"
-            >
-              <div className="flex items-center gap-1.5 mb-1">
-                <Zap className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
-                <p className="text-xs sm:text-sm font-bold text-white">Balanced Mix</p>
-              </div>
-              <p className="text-xs text-zinc-400">5 procs (bursts 3–8 ms)</p>
-            </button>
+          <div className="grid grid-cols-2 gap-2.5 text-left">
+            <div className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800">
+              <span className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                Preemption Mode
+              </span>
+              <span className="text-xs font-bold text-white">
+                {algorithmInfo.mode}
+              </span>
+            </div>
 
-            <button
-              type="button"
-              onClick={loadMultiQueueMix}
-              className="group text-left p-2.5 sm:p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white transition-all shadow-sm"
-            >
-              <div className="flex items-center gap-1.5 mb-1">
-                <Layers className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
-                <p className="text-xs sm:text-sm font-bold text-white">Interactive & Batch</p>
-              </div>
-              <p className="text-xs text-zinc-400">MLQ / MLFQ tier demo</p>
-            </button>
+            <div className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800">
+              <span className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                Starvation Risk
+              </span>
+              <span className="text-xs font-bold text-white">
+                {algorithmInfo.starvation}
+              </span>
+            </div>
+          </div>
 
-            <button
-              type="button"
-              onClick={loadPriorityTiersMix}
-              className="group text-left p-2.5 sm:p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white transition-all shadow-sm"
-            >
-              <div className="flex items-center gap-1.5 mb-1">
-                <Activity className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
-                <p className="text-xs sm:text-sm font-bold text-white">Priority Tiers</p>
-              </div>
-              <p className="text-xs text-zinc-400">Varied priorities P1–P4</p>
-            </button>
+          <div className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 text-left">
+            <span className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+              Execution Discipline & Behavior
+            </span>
+            <p className="text-xs text-zinc-200 font-medium leading-relaxed">
+              {algorithmInfo.rules}
+            </p>
+          </div>
 
+          <div className="flex items-center justify-between pt-0.5">
+            <span className="text-xs text-zinc-400 font-medium truncate pr-2">
+              Optimal For: <span className="text-zinc-200 font-semibold">{algorithmInfo.target}</span>
+            </span>
             <button
               type="button"
               onClick={generateRandomWorkload}
-              className="group text-left p-2.5 sm:p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white transition-colors border border-zinc-700 shrink-0"
+              title="Generate 10 random processes"
             >
-              <div className="flex items-center gap-1.5 mb-1">
-                <Shuffle className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
-                <p className="text-xs sm:text-sm font-bold text-white">Random 10 Procs</p>
-              </div>
-              <p className="text-xs text-zinc-400">Randomized workload</p>
+              <Shuffle className="w-3 h-3" />
+              <span>Random 10</span>
             </button>
           </div>
         </div>
