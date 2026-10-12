@@ -38,7 +38,7 @@ function CountUp({ value, decimals = 0, duration = 1000 }) {
   return <span>{count.toFixed(decimals)}</span>;
 }
 
-export function MetricsPanel({ metrics, avg }) {
+export function MetricsPanel({ metrics, avg, onOpenDashboard }) {
   const [page, setPage] = useState(0);
   const [prevMetrics, setPrevMetrics] = useState(metrics);
   const pageSize = 30; // 30 processes max per page to guarantee silky smooth animations

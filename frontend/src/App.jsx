@@ -5,12 +5,37 @@ import { GanttChart } from './components/GanttChart';
 import { MetricsPanel } from './components/MetricsPanel';
 import { ProcessInput } from './components/ProcessInput';
 import { QueueVisualizer } from './components/QueueVisualizer';
-import { Play, Loader2, Cpu, Layers } from 'lucide-react';
+import { ProcessDashboard } from './components/ProcessDashboard';
+import { Play, Loader2, Cpu, Layers, LayoutGrid, TableProperties } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const { processes, algorithm, config, setSimulationResult, simulationResult } = useStore();
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState(() => {
+    return window.location.hash === '#dashboard' ? 'dashboard' : 'visualizer';
+  });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#dashboard') {
+        setActiveTab('dashboard');
+      } else {
+        setActiveTab('visualizer');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const switchTab = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'dashboard') {
+      window.location.hash = 'dashboard';
+    } else {
+      history.pushState('', document.title, window.location.pathname + window.location.search);
+    }
+  };
 
   useEffect(() => {
     if (simulationResult) {
@@ -32,8 +57,6 @@ function App() {
         processes,
         config
       });
-      // If no results are on screen, wait for the placeholder to fade out before showing results.
-      // If results are already on screen, swap them immediately for a seamless transition.
       if (!simulationResult) {
         setTimeout(() => {
           setSimulationResult(res.data);
@@ -66,9 +89,9 @@ function App() {
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex-none flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 mb-5 p-4 px-6 bg-zinc-950 rounded-xl border border-zinc-900 shadow-lg"
+        className="flex-none flex flex-col md:flex-row items-center justify-between gap-4 mb-5 p-4 px-6 bg-zinc-950 rounded-xl border border-zinc-900 shadow-lg"
       >
-        <div className="flex items-center gap-4 w-full sm:w-auto justify-start">
+        <div className="flex items-center gap-4 w-full md:w-auto justify-start">
           <div className="p-2.5 bg-zinc-900 rounded-lg border border-zinc-800 hidden sm:block">
             <Cpu className="w-6 h-6 text-white" />
           </div>
@@ -78,93 +101,162 @@ function App() {
           </div>
         </div>
 
+        {/* View Switcher: Visualizer vs Process Analytics Dashboard */}
+        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/90 rounded-lg border border-zinc-800">
+          <button
+            onClick={() => switchTab('visualizer')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              activeTab === 'visualizer'
+                ? 'bg-white text-black font-bold shadow-sm'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>Visualizer</span>
+          </button>
+          
+          <button
+            onClick={() => switchTab('dashboard')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              activeTab === 'dashboard'
+                ? 'bg-white text-black font-bold shadow-sm'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            <TableProperties className="w-3.5 h-3.5" />
+            <span>Process Dashboard</span>
+            {processes.length > 0 && (
+              <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
+                activeTab === 'dashboard' ? 'bg-zinc-200 text-black' : 'bg-zinc-800 text-zinc-300'
+              }`}>
+                {processes.length}
+              </span>
+            )}
+          </button>
+        </div>
+
         <motion.button 
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={runSimulation}
           disabled={loading || processes.length === 0}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+          className="w-full md:w-auto flex items-center justify-center gap-2 bg-white text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
         >
           {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
           <span className="text-sm">{loading ? 'Simulating...' : 'Run Simulation'}</span>
         </motion.button>
       </motion.header>
 
-      <div className="flex-1 flex flex-col xl:grid xl:grid-cols-12 gap-5 pb-6">
-        
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="xl:col-span-4 flex flex-col min-h-0"
-        >
-          <ProcessInput />
-        </motion.div>
+      {/* Main Content Area */}
+      <AnimatePresence mode="wait">
+        {activeTab === 'dashboard' ? (
+          <motion.div
+            key="dashboard"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="flex-1 w-full"
+          >
+            <ProcessDashboard onRunSimulation={runSimulation} loading={loading} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="visualizer"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="flex-1 flex flex-col xl:grid xl:grid-cols-12 gap-5 pb-6"
+          >
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="xl:col-span-4 flex flex-col min-h-0"
+            >
+              <ProcessInput />
+            </motion.div>
 
-        <div className="xl:col-span-8 flex flex-col min-h-0">
-          <AnimatePresence mode="wait">
-            {simulationResult ? (
-              <motion.div 
-                key="results"
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-                className="flex flex-col gap-5 h-full"
-              >
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                  <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[440px] min-h-0">
-                    <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
-                      Execution Timeline
-                    </h2>
-                    <div className="flex-1 min-h-0">
-                      <GanttChart trace={simulationResult.trace} />
+            <div className="xl:col-span-8 flex flex-col min-h-0">
+              <AnimatePresence mode="wait">
+                {simulationResult ? (
+                  <motion.div 
+                    key="results"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                    className="flex flex-col gap-5 h-full"
+                  >
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                      <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[440px] min-h-0">
+                        <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
+                          Execution Timeline
+                        </h2>
+                        <div className="flex-1 min-h-0">
+                          <GanttChart trace={simulationResult.trace} />
+                        </div>
+                      </motion.div>
+                      
+                      <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[440px] min-h-0">
+                        <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
+                          Live Queues & States
+                        </h2>
+                        <div className="flex-1 min-h-0">
+                          <QueueVisualizer 
+                            trace={simulationResult.trace} 
+                            processes={processes} 
+                            algorithm={algorithm}
+                            simulationResult={simulationResult}
+                          />
+                        </div>
+                      </motion.div>
                     </div>
-                  </motion.div>
-                  
-                  <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[440px] min-h-0">
-                    <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
-                      Live Queues & States
-                    </h2>
-                    <div className="flex-1 min-h-0">
-                      <QueueVisualizer 
-                        trace={simulationResult.trace} 
-                        processes={processes} 
-                        algorithm={algorithm}
-                        simulationResult={simulationResult}
-                      />
-                    </div>
-                  </motion.div>
-                </div>
 
-                <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[300px] min-h-0">
-                  <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
-                    Comparative Analytics
-                  </h2>
-                  <div className="flex-1 min-h-0">
-                    <MetricsPanel metrics={simulationResult.metrics} avg={simulationResult.averageMetrics} />
-                  </div>
-                </motion.div>
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="empty"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="h-[400px] xl:h-[760px] flex flex-col items-center justify-center text-zinc-500 bg-zinc-950 rounded-xl border border-zinc-900 p-12 text-center"
-              >
-                <div className="p-6 bg-zinc-900 rounded-full mb-6 border border-zinc-800">
-                  <Layers className="w-12 h-12 text-zinc-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-zinc-300 mb-3">Ready to Simulate</h2>
-                <p className="text-sm max-w-sm mx-auto text-zinc-500">
-                  Configure your processes on the left, select a scheduling algorithm, and click <strong className="text-white font-semibold">Run Simulation</strong>.
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
+                    <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[300px] min-h-0">
+                      <div className="flex-none flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                          Comparative Analytics
+                        </h2>
+                        <button
+                          onClick={() => switchTab('dashboard')}
+                          className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 group"
+                        >
+                          <span>Open Full Process Dashboard</span>
+                          <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+                        </button>
+                      </div>
+                      <div className="flex-1 min-h-0">
+                        <MetricsPanel 
+                          metrics={simulationResult.metrics} 
+                          avg={simulationResult.averageMetrics} 
+                          onOpenDashboard={() => switchTab('dashboard')}
+                        />
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    key="empty"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="h-[400px] xl:h-[760px] flex flex-col items-center justify-center text-zinc-500 bg-zinc-950 rounded-xl border border-zinc-900 p-12 text-center"
+                  >
+                    <div className="p-6 bg-zinc-900 rounded-full mb-6 border border-zinc-800">
+                      <Layers className="w-12 h-12 text-zinc-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-zinc-300 mb-3">Ready to Simulate</h2>
+                    <p className="text-sm max-w-sm mx-auto text-zinc-500">
+                      Configure your processes on the left, select a scheduling algorithm, and click <strong className="text-white font-semibold">Run Simulation</strong>.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
