@@ -95,12 +95,12 @@ function App() {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="xl:col-span-4 min-h-[580px] flex flex-col"
+          className="xl:col-span-4 flex flex-col min-h-0"
         >
           <ProcessInput />
         </motion.div>
 
-        <div className="xl:col-span-8 flex flex-col gap-5">
+        <div className="xl:col-span-8 flex flex-col min-h-0">
           <AnimatePresence mode="wait">
             {simulationResult ? (
               <motion.div 
@@ -108,10 +108,10 @@ function App() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="show"
-                className="flex flex-col gap-5"
+                className="flex flex-col gap-5 h-full"
               >
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                  <motion.div variants={itemVariants} className="bg-zinc-950 p-5 rounded-xl border border-zinc-900 flex flex-col min-h-[560px]">
+                  <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[440px] min-h-0">
                     <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                       Execution Timeline
                     </h2>
@@ -120,11 +120,11 @@ function App() {
                     </div>
                   </motion.div>
                   
-                  <motion.div variants={itemVariants} className="bg-zinc-950 p-5 rounded-xl border border-zinc-900 flex flex-col min-h-[560px]">
+                  <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[440px] min-h-0">
                     <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                       Live Queues & States
                     </h2>
-                    <div className="flex-1 flex flex-col min-h-0">
+                    <div className="flex-1 min-h-0">
                       <QueueVisualizer 
                         trace={simulationResult.trace} 
                         processes={processes} 
@@ -135,7 +135,7 @@ function App() {
                   </motion.div>
                 </div>
 
-                <motion.div variants={itemVariants} className="bg-zinc-950 p-5 rounded-xl border border-zinc-900 flex flex-col min-h-[420px]">
+                <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[300px] min-h-0">
                   <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                     Comparative Analytics
                   </h2>
@@ -151,7 +151,7 @@ function App() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="h-[400px] xl:h-full flex flex-col items-center justify-center text-zinc-500 bg-zinc-950 rounded-xl border border-zinc-900 p-12 text-center"
+                className="h-[400px] xl:h-[760px] flex flex-col items-center justify-center text-zinc-500 bg-zinc-950 rounded-xl border border-zinc-900 p-12 text-center"
               >
                 <div className="p-6 bg-zinc-900 rounded-full mb-6 border border-zinc-800">
                   <Layers className="w-12 h-12 text-zinc-600" />

@@ -34,7 +34,7 @@ const CustomTooltip = ({ active, payload }) => {
 export function GanttChart({ trace }) {
   const [page, setPage] = useState(0);
   const [prevTrace, setPrevTrace] = useState(trace);
-  const pageSize = 100;
+  const pageSize = 15;
 
   if (prevTrace !== trace) {
     setPrevTrace(trace);
@@ -73,29 +73,31 @@ export function GanttChart({ trace }) {
   if (!trace || trace.length === 0) return <div className="text-zinc-600 h-full flex items-center justify-center font-medium">No trace available</div>;
 
   return (
-    <div className="w-full h-full min-h-[250px] bg-zinc-900/30 rounded-lg border border-zinc-800/50 overflow-y-auto custom-scrollbar relative flex flex-col">
-      <div className="w-full flex-none" style={{ height: Math.max(250, displayData.length * 28), padding: '8px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            layout="vertical"
-            data={displayData}
-            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={false} />
-            <XAxis type="number" stroke="#71717a" tickLine={false} axisLine={false} tick={{fill: '#a1a1aa', fontSize: 12}} />
-            <YAxis dataKey="name" type="category" stroke="#71717a" tickLine={false} axisLine={false} width={60} tick={{fontWeight: '500', fill: '#d4d4d8', fontSize: 12}} />
-            <Tooltip content={<CustomTooltip />} cursor={{fill: '#18181b', opacity: 0.5}} />
-            <Bar dataKey="duration" radius={[2, 2, 2, 2]} barSize={20} isAnimationActive={true} animationDuration={800}>
-              {displayData.map((entry, index) => (
-                <Cell key={`cell-${page}-${index}`} fill={getColor(entry.name)} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+    <div className="w-full h-full bg-zinc-900/30 rounded-lg border border-zinc-800/50 flex flex-col justify-between overflow-hidden">
+      <div className="w-full flex-1 min-h-0 overflow-y-auto custom-scrollbar p-2">
+        <div style={{ height: Math.max(200, displayData.length * 20) }} className="w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              layout="vertical"
+              data={displayData}
+              margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={false} />
+              <XAxis type="number" stroke="#71717a" tickLine={false} axisLine={false} tick={{fill: '#a1a1aa', fontSize: 11}} />
+              <YAxis dataKey="name" type="category" stroke="#71717a" tickLine={false} axisLine={false} width={50} tick={{fontWeight: '500', fill: '#d4d4d8', fontSize: 11}} />
+              <Tooltip content={<CustomTooltip />} cursor={{fill: '#18181b', opacity: 0.5}} />
+              <Bar dataKey="duration" radius={[2, 2, 2, 2]} barSize={16} isAnimationActive={true} animationDuration={800}>
+                {displayData.map((entry, index) => (
+                  <Cell key={`cell-${page}-${index}`} fill={getColor(entry.name)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {totalPages > 1 && (
-        <div className="flex-none flex items-center justify-center gap-4 py-3 border-t border-zinc-800/50 bg-zinc-950/50 sticky bottom-0">
+        <div className="flex-none flex items-center justify-center gap-4 py-2 border-t border-zinc-800/50 bg-zinc-950/80 sticky bottom-0">
           <button 
             onClick={() => setPage(p => Math.max(0, p - 1))}
             disabled={page === 0}

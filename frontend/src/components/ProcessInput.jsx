@@ -65,8 +65,8 @@ export function ProcessInput() {
   };
 
   return (
-    <div className="bg-zinc-950 p-5 rounded-xl border border-zinc-900 flex flex-col h-full min-h-0">
-      <div className="flex-none mb-5">
+    <div className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-full xl:h-[760px] min-h-0">
+      <div className="flex-none mb-4">
         <h2 className="text-sm font-semibold text-white flex items-center gap-2 mb-3">
           <Settings className="w-4 h-4 text-zinc-400" /> System Configuration
         </h2>
@@ -220,7 +220,7 @@ export function ProcessInput() {
           )}
         </div>
         
-        <div className="flex-1 overflow-y-auto mb-4 pr-1 custom-scrollbar min-h-0">
+        <div className="flex-1 min-h-[100px] max-h-[240px] overflow-y-auto mb-2.5 pr-1 custom-scrollbar">
           <AnimatePresence initial={false}>
             {processes.slice(0, 50).map(p => {
               const isLarge = processes.length > 50;
