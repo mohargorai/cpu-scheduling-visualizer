@@ -3,23 +3,19 @@
 /**
  * Multilevel Queue (MLQ) CPU Scheduling Algorithm
  * 
- * OS Concept (Silberschatz):
- * The ready queue is partitioned into multiple separate, independent queues based on
- * process characteristics (e.g., priority, interactive vs. batch).
+ * OS Concept:
+ * The ready queue is partitioned into separate queues, each with its own scheduling algorithm.
+ * Processes are permanently assigned to one queue based on their priority or attributes (unlike MLFQ,
+ * processes do NOT move between queues).
  * 
- * Key Principles of MLQ:
- * 1. Permanent Queue Assignment: Each process is permanently assigned to a specific queue
- *    based on its priority/type upon arrival (e.g. Priority <= 1 -> Q0, Priority 2 -> Q1, Priority >= 3 -> Q2).
- *    Processes NEVER move between queues (unlike MLFQ where processes demote/age).
- * 2. Independent Scheduling per Queue:
- *    - Queue 0 (System / Interactive): Round Robin with Time Quantum Q0 (default = timeQuantum).
- *    - Queue 1 (Interactive): Round Robin with Time Quantum Q1 (default = 2 * timeQuantum).
- *    - Queue 2 (Batch Processes): First-Come, First-Served (FCFS).
- * 3. Fixed-Priority Preemptive Scheduling between Queues:
- *    - No process in Queue 1 can run if Queue 0 is not empty.
- *    - No process in Queue 2 can run if Queue 0 or Queue 1 is not empty.
- *    - If a process arrives in a higher-priority queue while a lower-priority queue is executing,
- *      the lower-priority process is preempted immediately.
+ * Standard textbook model:
+ * - Queue 0 (System / High Priority): Round Robin with Quantum Q0 (default 2)
+ * - Queue 1 (Interactive / Medium Priority): Round Robin with Quantum Q1 (default 4)
+ * - Queue 2 (Batch / Low Priority): First-Come, First-Served (FCFS)
+ * 
+ * Scheduling among queues: Fixed priority preemptive scheduling.
+ * Queue 0 has absolute priority over Queue 1, which has absolute priority over Queue 2.
+ * If a process arrives in a higher queue, any executing process in a lower queue is preempted immediately.
  */
 
 function mergeContiguousTrace(trace) {
@@ -37,48 +33,48 @@ function mergeContiguousTrace(trace) {
 }
 
 function simulateMLQ(processes, quanta = [2, 4]) {
-    const q0Quantum = Math.max(1, Number(quanta[0]) || 2);
-    const q1Quantum = Math.max(1, Number(quanta[1]) || 4);
+    const q0Quantum = quanta[0] || 2;
+    const q1Quantum = quanta[1] || 4;
 
-    // Map each process permanently to a queue based on priority
-    // Priority <= 1 -> Queue 0 (RR q0)
-    // Priority == 2 -> Queue 1 (RR q1)
-    // Priority >= 3 -> Queue 2 (FCFS)
-    const procs = processes.map(p => {
-        let assignedQueue = 2;
-        if (p.priority <= 1) {
-            assignedQueue = 0;
-        } else if (p.priority === 2) {
-            assignedQueue = 1;
+    // Permanently assign each process to a queue based on priority or explicit queueLevel
+    let procs = processes.map(p => {
+        let assignedQueue;
+        if (p.queueLevel !== undefined && p.queueLevel !== null) {
+            assignedQueue = Math.min(2, Math.max(0, Number(p.queueLevel) || 0));
         } else {
-            assignedQueue = 2;
+            const prio = Number(p.priority) || 0;
+            if (prio <= 1) assignedQueue = 0;
+            else if (prio === 2) assignedQueue = 1;
+            else assignedQueue = 2;
         }
 
         return {
             ...p,
             remainingTime: p.burstTime,
             completionTime: 0,
-            assignedQueue,
-            timeInCurrentSlice: 0
+            queueLevel: assignedQueue,
+            timeInCurrentQuantum: 0
         };
     });
 
-    // Sort by arrival time
     procs.sort((a, b) => a.arrivalTime - b.arrivalTime);
 
-    const queues = [[], [], []]; // Q0, Q1, Q2
+    // 3 Fixed Queues: Q0 (RR), Q1 (RR), Q2 (FCFS)
+    let queues = [[], [], []];
+
     let currentTime = 0;
     let trace = [];
     let metrics = [];
     let totalIdleTime = 0;
+
     let completedCount = 0;
     const n = processes.length;
     let processIndex = 0;
 
-    // Enqueue initial arrivals at T=0
+    // Initial arrivals
     while (processIndex < n && procs[processIndex].arrivalTime <= currentTime) {
         const p = procs[processIndex];
-        queues[p.assignedQueue].push(p);
+        queues[p.queueLevel].push(p);
         processIndex++;
     }
 
@@ -87,21 +83,28 @@ function simulateMLQ(processes, quanta = [2, 4]) {
     let currentQueueLevel = -1;
 
     while (completedCount < n) {
-        // Find highest-priority non-empty queue
-        let selectedQueue = -1;
-        for (let q = 0; q < queues.length; q++) {
+        // Find highest priority non-empty queue (Fixed Priority: 0 > 1 > 2)
+        let selectedQueueLevel = -1;
+        for (let q = 0; q < 3; q++) {
             if (queues[q].length > 0) {
-                selectedQueue = q;
+                selectedQueueLevel = q;
                 break;
             }
         }
 
-        if (selectedQueue !== -1) {
-            const currentProcess = queues[selectedQueue][0];
+        if (selectedQueueLevel !== -1) {
+            let p = queues[selectedQueueLevel].shift();
+            
+            // Determine max time slice for this queue
+            let maxQuantum;
+            if (selectedQueueLevel === 0) maxQuantum = q0Quantum;
+            else if (selectedQueueLevel === 1) maxQuantum = q1Quantum;
+            else maxQuantum = p.remainingTime; // Queue 2 is FCFS: runs until finished or preempted
 
-            // If switching from idle or another process
-            if (lastProcessId !== currentProcess.id) {
-                if (lastProcessId !== null) {
+            let executeLimit = Math.min(p.remainingTime, maxQuantum - p.timeInCurrentQuantum);
+
+            if (lastProcessId !== p.id || currentQueueLevel !== selectedQueueLevel) {
+                if (lastProcessId !== null && lastProcessId !== 'IDLE') {
                     trace.push({
                         processId: lastProcessId,
                         startTime: burstStart,
@@ -109,75 +112,105 @@ function simulateMLQ(processes, quanta = [2, 4]) {
                         queue: currentQueueLevel
                     });
                 }
-                lastProcessId = currentProcess.id;
+                lastProcessId = p.id;
                 burstStart = currentTime;
-                currentQueueLevel = selectedQueue;
+                currentQueueLevel = selectedQueueLevel;
             }
 
-            // Execute 1 tick
-            currentProcess.remainingTime--;
-            currentProcess.timeInCurrentSlice++;
-            currentTime++;
+            let preemptedByHigherQueue = false;
 
-            // Check for new arrivals at this new currentTime
-            while (processIndex < n && procs[processIndex].arrivalTime <= currentTime) {
-                const incoming = procs[processIndex];
-                queues[incoming.assignedQueue].push(incoming);
-                processIndex++;
-            }
+            // Execute step-by-step to handle preemption when new higher-priority processes arrive
+            for (let t = 1; t <= executeLimit; t++) {
+                currentTime++;
+                p.remainingTime--;
+                p.timeInCurrentQuantum++;
 
-            // Check if current process completed
-            if (currentProcess.remainingTime === 0) {
-                currentProcess.completionTime = currentTime;
-                queues[selectedQueue].shift(); // Remove completed process
-                completedCount++;
+                // Check new arrivals at current tick
+                while (processIndex < n && procs[processIndex].arrivalTime === currentTime) {
+                    const arrivalProc = procs[processIndex];
+                    queues[arrivalProc.queueLevel].push(arrivalProc);
+                    processIndex++;
+                }
 
-                const turnaroundTime = currentProcess.completionTime - currentProcess.arrivalTime;
-                const waitingTime = turnaroundTime - currentProcess.burstTime;
-
-                metrics.push({
-                    id: currentProcess.id,
-                    arrivalTime: currentProcess.arrivalTime,
-                    burstTime: currentProcess.burstTime,
-                    priority: currentProcess.priority,
-                    queue: currentProcess.assignedQueue,
-                    completionTime: currentProcess.completionTime,
-                    turnaroundTime,
-                    waitingTime
-                });
-            } else {
-                // Process is not finished yet. Check preemption conditions:
-                
-                // 1. Higher-priority queue preemption: Has any higher-priority queue received arrivals?
-                let higherQueueHasProcesses = false;
-                for (let q = 0; q < selectedQueue; q++) {
-                    if (queues[q].length > 0) {
-                        higherQueueHasProcesses = true;
+                // Preempt if any higher-priority queue received a process
+                if (selectedQueueLevel > 0) {
+                    let higherQueueHasProcess = false;
+                    for (let hq = 0; hq < selectedQueueLevel; hq++) {
+                        if (queues[hq].length > 0) {
+                            higherQueueHasProcess = true;
+                            break;
+                        }
+                    }
+                    if (higherQueueHasProcess) {
+                        preemptedByHigherQueue = true;
                         break;
                     }
                 }
 
-                if (higherQueueHasProcesses) {
-                    // Preempted by a higher priority queue!
-                    // Reset timeInCurrentSlice for next turn, but do NOT demote
-                    currentProcess.timeInCurrentSlice = 0;
-                    // In RR queues, move to back or stay at head? Keep at head so it resumes immediately when higher queue clears
-                    // (already at head of queues[selectedQueue])
-                } else if (selectedQueue === 0 && currentProcess.timeInCurrentSlice >= q0Quantum) {
-                    // Quantum expired in Queue 0 (RR)
-                    currentProcess.timeInCurrentSlice = 0;
-                    queues[0].shift();
-                    queues[0].push(currentProcess); // Rotate to back of Queue 0 (NO feedback/demotion!)
-                } else if (selectedQueue === 1 && currentProcess.timeInCurrentSlice >= q1Quantum) {
-                    // Quantum expired in Queue 1 (RR)
-                    currentProcess.timeInCurrentSlice = 0;
-                    queues[1].shift();
-                    queues[1].push(currentProcess); // Rotate to back of Queue 1 (NO feedback/demotion!)
+                if (p.remainingTime === 0) {
+                    break;
                 }
-                // Queue 2 is FCFS: runs until termination or preemption by higher queues
             }
+
+            if (p.remainingTime === 0) {
+                // Process terminated
+                p.completionTime = currentTime;
+                completedCount++;
+
+                const turnaroundTime = p.completionTime - p.arrivalTime;
+                const waitingTime = turnaroundTime - p.burstTime;
+
+                metrics.push({
+                    processId: p.id,
+                    arrivalTime: p.arrivalTime,
+                    burstTime: p.burstTime,
+                    priority: p.priority,
+                    completionTime: p.completionTime,
+                    turnaroundTime,
+                    waitingTime: Math.max(0, waitingTime),
+                    queue: p.queueLevel
+                });
+
+                trace.push({
+                    processId: p.id,
+                    startTime: burstStart,
+                    endTime: currentTime,
+                    queue: selectedQueueLevel
+                });
+                lastProcessId = null;
+
+            } else if (preemptedByHigherQueue) {
+                // Preempted by a higher queue: put at front of its own queue to resume when higher queues clear
+                queues[selectedQueueLevel].unshift(p);
+
+                trace.push({
+                    processId: p.id,
+                    startTime: burstStart,
+                    endTime: currentTime,
+                    queue: selectedQueueLevel
+                });
+                lastProcessId = null;
+
+            } else if (p.timeInCurrentQuantum >= maxQuantum) {
+                // Time quantum expired in RR queue (Queue 0 or 1): reset quantum counter, rotate to back of SAME queue
+                p.timeInCurrentQuantum = 0;
+                queues[selectedQueueLevel].push(p);
+
+                trace.push({
+                    processId: p.id,
+                    startTime: burstStart,
+                    endTime: currentTime,
+                    queue: selectedQueueLevel
+                });
+                lastProcessId = null;
+
+            } else {
+                // General fallback
+                queues[selectedQueueLevel].push(p);
+            }
+
         } else {
-            // CPU is idle
+            // CPU is IDLE
             if (lastProcessId !== 'IDLE') {
                 if (lastProcessId !== null) {
                     trace.push({
@@ -191,41 +224,22 @@ function simulateMLQ(processes, quanta = [2, 4]) {
                 burstStart = currentTime;
                 currentQueueLevel = -1;
             }
-
             totalIdleTime++;
             currentTime++;
 
-            // Check for new arrivals during idle tick
-            while (processIndex < n && procs[processIndex].arrivalTime <= currentTime) {
-                const incoming = procs[processIndex];
-                queues[incoming.assignedQueue].push(incoming);
+            while (processIndex < n && procs[processIndex].arrivalTime === currentTime) {
+                const p = procs[processIndex];
+                queues[p.queueLevel].push(p);
                 processIndex++;
             }
         }
     }
 
-    // Push final segment
-    if (lastProcessId !== null) {
-        trace.push({
-            processId: lastProcessId,
-            startTime: burstStart,
-            endTime: currentTime,
-            queue: currentQueueLevel
-        });
-    }
-
     const totalTime = currentTime;
     const cpuUtilization = totalTime === 0 ? 0 : ((totalTime - totalIdleTime) / totalTime) * 100;
 
-    const avgWT = metrics.length === 0 ? 0 : metrics.reduce((acc, m) => acc + m.waitingTime, 0) / metrics.length;
-    const avgTAT = metrics.length === 0 ? 0 : metrics.reduce((acc, m) => acc + m.turnaroundTime, 0) / metrics.length;
-
-    // Sort metrics by original process order or ID
-    metrics.sort((a, b) => {
-        const idA = parseInt(a.id.replace(/\D/g, '')) || 0;
-        const idB = parseInt(b.id.replace(/\D/g, '')) || 0;
-        return idA - idB;
-    });
+    const avgWT = metrics.length ? metrics.reduce((acc, m) => acc + m.waitingTime, 0) / metrics.length : 0;
+    const avgTAT = metrics.length ? metrics.reduce((acc, m) => acc + m.turnaroundTime, 0) / metrics.length : 0;
 
     return {
         trace: mergeContiguousTrace(trace),

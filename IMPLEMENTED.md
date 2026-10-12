@@ -46,10 +46,10 @@ The application follows a decoupled client-server architecture:
 |                 |                                             |                 |
 |                 v                                             v                 |
 |  +-------------------------------+             +-----------------------------+  |
-|  |  Standard Schedulers          |             |  Advanced MLFQ Engine       |  |
-|  |  - FCFS, SJF, SRTF            |             |  - 3-Tier Multi-Queue       |  |
-|  |  - Round Robin (RR)           |             |  - Quantum Demotion         |  |
-|  |  - Priority (Preempt/Non)     |             |  - Starvation Aging Boost   |  |
+|  |  Standard Schedulers          |             |  Multi-Queue Engines        |  |
+|  |  - FCFS, SJF, SRTF            |             |  - MLQ (Static Partitioning)|  |
+|  |  - Round Robin (RR)           |             |  - MLFQ (Dynamic Feedback)  |  |
+|  |  - Priority (Preempt/Non)     |             |  - Aging & Quantum Demotion |  |
 |  +-------------------------------+             +-----------------------------+  |
 |                 |                                             |                 |
 |                 +-------------------------------------------------------------+  |
@@ -104,14 +104,12 @@ The application follows a decoupled client-server architecture:
   - **Preemptive:** Dispatched process is immediately preempted if a higher priority process arrives.
 
 ### 2.6 Multilevel Queue (MLQ)
-- **Class:** Preemptive Multi-Queue without Feedback
-- **Concept:** Divides the ready queue into multiple separate, independent queues based permanently on process characteristics (such as priority or process type).
-  - **Queue 0 ($Q_0$ - System / Interactive):** High priority processes ($\text{Priority} \le 1$). Uses Round Robin with quantum $Q_0 = \text{timeQuantum}$.
-  - **Queue 1 ($Q_1$ - Interactive):** Medium priority processes ($\text{Priority} = 2$). Uses Round Robin with quantum $Q_1 = 2 \times \text{timeQuantum}$.
-  - **Queue 2 ($Q_2$ - Batch):** Low priority processes ($\text{Priority} \ge 3$). Uses First-Come, First-Served (FCFS).
-- **Key Distinctions from MLFQ:**
-  - **Permanent Queue Assignment:** Processes are permanently assigned upon arrival and **never migrate** between queues (zero feedback/demotion).
-  - **Fixed-Priority Preemption:** A lower queue cannot execute unless all higher queues are completely empty. Any arrival into a higher queue immediately preempts execution in lower queues.
+- **Class:** Preemptive Partitioned Multi-Queue
+- **Concept:** The ready queue is partitioned into separate, permanently assigned queues based on process attributes (Priority / Type). Unlike MLFQ, processes **never migrate or demote** between queues.
+  - **Queue 0 ($Q_0$ - System / High Priority, Priority $\le$ 1):** Round Robin with Time Quantum $Q_0 = 2$.
+  - **Queue 1 ($Q_1$ - Interactive / Medium Priority, Priority = 2):** Round Robin with Time Quantum $Q_1 = 4$.
+  - **Queue 2 ($Q_2$ - Batch / Low Priority, Priority $\ge$ 3):** First-Come, First-Served (FCFS).
+- **Inter-Queue Scheduling:** Fixed priority preemptive scheduling ($Q_0 > Q_1 > Q_2$). If a higher-priority process arrives in a higher queue, executing lower-queue processes are immediately preempted and returned to their respective queue.
 
 ### 2.7 Multi-Level Feedback Queue (MLFQ)
 - **Class:** Preemptive, Adaptive Multi-Queue

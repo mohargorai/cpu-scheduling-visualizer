@@ -100,7 +100,7 @@ export function ProcessInput() {
             </div>
           </div>
           
-          {(algorithm === 'RR' || algorithm === 'MLQ' || algorithm === 'MLFQ') && (
+          {(algorithm === 'RR' || algorithm === 'MLFQ') && (
             <motion.div 
               initial={{ opacity: 0, height: 0 }} 
               animate={{ opacity: 1, height: 'auto' }} 
@@ -113,11 +113,20 @@ export function ProcessInput() {
                 value={config.timeQuantum === '' ? '' : config.timeQuantum}
                 onChange={(e) => setConfig({ timeQuantum: e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1) })}
               />
-              {algorithm === 'MLQ' && (
-                <p className="text-[10px] text-zinc-500 mt-1.5 leading-relaxed">
-                  Queues: <span className="text-zinc-300">Q0</span> (Priority ≤ 1, RR {config.timeQuantum || 2}), <span className="text-zinc-300">Q1</span> (Priority 2, RR {(config.timeQuantum || 2) * 2}), <span className="text-zinc-300">Q2</span> (Priority ≥ 3, FCFS).
-                </p>
-              )}
+            </motion.div>
+          )}
+
+          {algorithm === 'MLQ' && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }} 
+              animate={{ opacity: 1, height: 'auto' }} 
+              exit={{ opacity: 0, height: 0 }}
+              className="text-[11px] text-zinc-400 bg-zinc-900/80 p-2.5 rounded-lg border border-zinc-800 space-y-1.5"
+            >
+              <div className="font-semibold text-zinc-200 text-[10px] uppercase tracking-wider">Queue Partitions (Fixed Priority):</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q0</span> (Priority ≤ 1): Round Robin (Q={config.quanta?.[0] || 2})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q1</span> (Priority = 2): Round Robin (Q={config.quanta?.[1] || 4})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q2</span> (Priority ≥ 3): First-Come First-Served</div>
             </motion.div>
           )}
         </div>
