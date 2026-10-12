@@ -298,7 +298,7 @@ export function ProcessInput() {
           )}
         </div>
         
-        <div className="flex-1 min-h-[140px] overflow-y-auto mb-2.5 pr-1 custom-scrollbar">
+        <div className="flex-1 min-h-[120px] max-h-[220px] overflow-y-auto mb-2.5 pr-1 custom-scrollbar">
           <AnimatePresence initial={false}>
             {processes.slice(0, 50).map(p => {
               const isLarge = processes.length > 50;

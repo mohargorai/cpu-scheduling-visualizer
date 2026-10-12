@@ -177,7 +177,7 @@ function App() {
               <ProcessInput />
             </motion.div>
 
-            <div className="xl:col-span-8 flex flex-col min-h-0 h-full">
+            <div className="xl:col-span-8 flex flex-col min-h-0 h-full flex-1">
               <AnimatePresence mode="wait">
                 {simulationResult ? (
                   <motion.div 
@@ -185,7 +185,7 @@ function App() {
                     variants={containerVariants}
                     initial="hidden"
                     animate="show"
-                    className="flex flex-col gap-5 h-full"
+                    className="flex flex-col gap-5 h-full flex-1"
                   >
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
                       <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col min-h-[480px]">
@@ -212,7 +212,7 @@ function App() {
                       </motion.div>
                     </div>
 
-                    <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[300px] min-h-0">
+                    <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col flex-1 min-h-[300px]">
                       <div className="flex-none flex items-center justify-between mb-3">
                         <h2 className="text-sm font-semibold text-white flex items-center gap-2">
                           Comparative Analytics
