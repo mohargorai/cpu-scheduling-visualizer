@@ -75,16 +75,12 @@ export function ProcessInput() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Scheduling Engine</label>
-              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
-                algorithm === 'MLQ' || algorithm === 'MLFQ' 
-                  ? 'bg-purple-950/80 text-purple-300 border-purple-800' 
-                  : 'bg-zinc-800 text-zinc-400 border-zinc-700'
-              }`}>
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded border bg-zinc-900 text-zinc-400 border-zinc-800">
                 {algorithm === 'MLQ' || algorithm === 'MLFQ' ? 'Multi-Queue Engine' : 'Standard Unilevel'}
               </span>
             </div>
 
-            {/* Category Segmented Selector */}
+            {/* Category Segmented Selector - Pure Monochrome */}
             <div className="grid grid-cols-2 gap-1 p-1 bg-zinc-950 rounded-lg border border-zinc-800 mb-2">
               <button
                 type="button"
@@ -95,8 +91,8 @@ export function ProcessInput() {
                 }}
                 className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
                   algorithm !== 'MLQ' && algorithm !== 'MLFQ'
-                    ? 'bg-zinc-800 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                    ? 'bg-white text-black font-bold shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 Standard Schedulers
@@ -108,14 +104,13 @@ export function ProcessInput() {
                     setAlgorithm('MLQ');
                   }
                 }}
-                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1 ${
+                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
                   algorithm === 'MLQ' || algorithm === 'MLFQ'
-                    ? 'bg-purple-600/90 text-white shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                    ? 'bg-white text-black font-bold shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                <span>Multi-Queue Engines</span>
-                <span className="text-[10px]">✨</span>
+                Multi-Queue Engines
               </button>
             </div>
 
@@ -133,7 +128,7 @@ export function ProcessInput() {
                   <option value="Priority" className="bg-zinc-900 text-white font-normal">Priority (Non-Preemptive)</option>
                   <option value="PreemptivePriority" className="bg-zinc-900 text-white font-normal">Priority (Preemptive)</option>
                 </optgroup>
-                <optgroup label="── Multi-Queue Scheduling Engines ──" className="bg-zinc-950 font-bold text-purple-400">
+                <optgroup label="── Multi-Queue Scheduling Engines ──" className="bg-zinc-950 font-bold text-zinc-300">
                   <option value="MLQ" className="bg-zinc-900 text-white font-normal">Multilevel Queue (MLQ)</option>
                   <option value="MLFQ" className="bg-zinc-900 text-white font-normal">Multi-Level Feedback Queue (MLFQ)</option>
                 </optgroup>
@@ -167,17 +162,17 @@ export function ProcessInput() {
               initial={{ opacity: 0, height: 0 }} 
               animate={{ opacity: 1, height: 'auto' }} 
               exit={{ opacity: 0, height: 0 }}
-              className="text-[11px] text-zinc-400 bg-purple-950/20 p-2.5 rounded-lg border border-purple-900/40 space-y-1.5"
+              className="text-[11px] text-zinc-400 bg-zinc-900/60 p-2.5 rounded-lg border border-zinc-800 space-y-1.5"
             >
-              <div className="font-semibold text-purple-200 text-[10px] uppercase tracking-wider flex items-center justify-between">
+              <div className="font-semibold text-zinc-200 text-[10px] uppercase tracking-wider flex items-center justify-between">
                 <span>MLFQ Dynamic Feedback Architecture:</span>
-                <span className="text-[9px] text-purple-400 font-normal">3 Dynamic Queues</span>
+                <span className="text-[9px] text-zinc-400 font-normal">3 Dynamic Queues</span>
               </div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-emerald-400">Q₀</span>: Top Priority Entry Queue (RR q={config.quanta?.[0] || 2})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-cyan-400">Q₁</span>: Intermediate Priority Queue (RR q={config.quanta?.[1] || 4})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-amber-400">Q₂</span>: Background Batch Queue (RR q={config.quanta?.[2] || 8})</div>
-              <div className="text-[9px] text-zinc-400 pt-1 border-t border-purple-900/30">
-                ⚡ Processes demote on quantum expiry; promoted to Q₀ upon aging (10ms wait).
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₀</span>: Top Priority Entry Queue (RR q={config.quanta?.[0] || 2})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₁</span>: Intermediate Priority Queue (RR q={config.quanta?.[1] || 4})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₂</span>: Background Batch Queue (RR q={config.quanta?.[2] || 8})</div>
+              <div className="text-[9px] text-zinc-500 pt-1 border-t border-zinc-800">
+                Processes demote on quantum expiry; promoted to Q₀ upon aging (10ms wait).
               </div>
             </motion.div>
           )}
@@ -187,17 +182,17 @@ export function ProcessInput() {
               initial={{ opacity: 0, height: 0 }} 
               animate={{ opacity: 1, height: 'auto' }} 
               exit={{ opacity: 0, height: 0 }}
-              className="text-[11px] text-zinc-400 bg-blue-950/20 p-2.5 rounded-lg border border-blue-900/40 space-y-1.5"
+              className="text-[11px] text-zinc-400 bg-zinc-900/60 p-2.5 rounded-lg border border-zinc-800 space-y-1.5"
             >
-              <div className="font-semibold text-blue-200 text-[10px] uppercase tracking-wider flex items-center justify-between">
+              <div className="font-semibold text-zinc-200 text-[10px] uppercase tracking-wider flex items-center justify-between">
                 <span>MLQ Priority Partition Architecture:</span>
-                <span className="text-[9px] text-blue-400 font-normal">3 Fixed Queues</span>
+                <span className="text-[9px] text-zinc-400 font-normal">3 Fixed Queues</span>
               </div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-emerald-400">Q₀</span> (Priority ≤ 1): Real-Time / System (RR q={config.quanta?.[0] || 2})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-cyan-400">Q₁</span> (Priority = 2): Interactive (RR q={config.quanta?.[1] || 4})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-amber-400">Q₂</span> (Priority ≥ 3): Batch (FCFS)</div>
-              <div className="text-[9px] text-zinc-400 pt-1 border-t border-blue-900/30">
-                🔒 Fixed-priority preemption; processes remain strictly in assigned partitions.
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₀</span> (Priority ≤ 1): Real-Time / System (RR q={config.quanta?.[0] || 2})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₁</span> (Priority = 2): Interactive (RR q={config.quanta?.[1] || 4})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₂</span> (Priority ≥ 3): Batch (FCFS)</div>
+              <div className="text-[9px] text-zinc-500 pt-1 border-t border-zinc-800">
+                Fixed-priority preemption; processes remain strictly in assigned partitions.
               </div>
             </motion.div>
           )}

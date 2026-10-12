@@ -110,7 +110,7 @@ function App() {
                 animate="show"
                 className="flex flex-col gap-4 h-full min-h-0"
               >
-                <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 xl:flex-1 xl:min-h-0">
+                <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 xl:flex-[1.35] xl:min-h-0">
                   <motion.div variants={itemVariants} className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col h-[400px] xl:h-full min-h-0">
                     <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                       Execution Timeline
@@ -135,7 +135,7 @@ function App() {
                   </motion.div>
                 </div>
 
-                <motion.div variants={itemVariants} className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col h-[500px] xl:flex-[1.2] xl:min-h-0">
+                <motion.div variants={itemVariants} className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col h-[450px] xl:flex-1 xl:min-h-0">
                   <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                     Comparative Analytics
                   </h2>
