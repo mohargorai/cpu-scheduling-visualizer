@@ -52,11 +52,9 @@ The application follows a decoupled client-server architecture:
 |  |  - Priority (Preempt/Non)     |             |  - Starvation Aging Boost   |  |
 |  +-------------------------------+             +-----------------------------+  |
 |                 |                                             |                 |
-|                 +----------------------+----------------------+                 |
-|                                        v                                        |
-|                     +------------------------------------+                      |
-|                     | MongoDB Persistence (Mongoose Opt) |                      |
-|                     +------------------------------------+                      |
+|                 +-------------------------------------------------------------+  |
+|                 | Pure In-Memory Discrete Event Simulation (Zero DB Overhead) |  |
+|                 +-------------------------------------------------------------+  |
 +---------------------------------------------------------------------------------+
 ```
 
@@ -179,8 +177,7 @@ $$\text{CPU Utilization (\%)} = \left( \frac{\text{Total Simulation Time} - \tex
 ### 6.2 Backend & Data Layer
 - **Node.js (v24):** Event-driven server runtime environment.
 - **Express.js:** Minimalist REST API web framework.
-- **CORS:** Cross-Origin Resource Sharing middleware for frontend communication.
-- **MongoDB & Mongoose (Optional):** Document schema modeling for persisting historical simulation logs.
+- **Architecture:** 100% In-Memory Simulation Pipeline (Zero database overhead, high throughput).
 
 ### 6.3 Tooling & Build Environment
 - **Git & GitHub:** Distributed version control and remote deployment tracking.

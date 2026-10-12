@@ -1,23 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const { simulateFCFS } = require('./simulator/fcfs');
 const { simulateSJF } = require('./simulator/sjf');
 const { simulateRR } = require('./simulator/rr');
 const { simulatePriority } = require('./simulator/priority');
 const { simulateMLFQ } = require('./simulator/mlfq');
-const SimulationLog = require('./models/SimulationLog');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection is optional so the MVP runs easily
-mongoose.connect('mongodb://localhost:27017/os-simulator')
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.log('MongoDB connection failed (Running without DB). Start MongoDB if you want to save logs.'));
-
-app.post('/api/simulate', async (req, res) => {
+app.post('/api/simulate', (req, res) => {
     try {
         const { algorithm, processes, config } = req.body;
         
@@ -29,7 +22,7 @@ app.post('/api/simulate', async (req, res) => {
             return res.status(413).json({ error: 'Payload too large: Max 1500 processes allowed per simulation to prevent server overload.' });
         }
         
-        // Sanitize inputs to ensure they are strictly numbers (Prevents NoSQL Injection / Type attacks)
+        // Sanitize inputs to ensure they are strictly numbers
         const sanitizedProcesses = processes.map(p => ({
             id: String(p.id).substring(0, 50),
             arrivalTime: Math.max(0, Number(p.arrivalTime) || 0),
@@ -49,16 +42,6 @@ app.post('/api/simulate', async (req, res) => {
             case 'PreemptivePriority': result = simulatePriority(sanitizedProcesses, true); break;
             case 'MLFQ': result = simulateMLFQ(sanitizedProcesses, config?.quanta || [2, 4, 8], config?.agingThreshold || 10); break;
             default: return res.status(400).json({ error: 'Unknown algorithm' });
-        }
-
-        if (mongoose.connection.readyState === 1) {
-            const log = new SimulationLog({
-                algorithm,
-                processes: sanitizedProcesses,
-                metrics: result.metrics,
-                averageMetrics: result.averageMetrics
-            });
-            await log.save().catch(e => console.error("DB Save Error:", e));
         }
 
         res.json(result);
