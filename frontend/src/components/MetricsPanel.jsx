@@ -38,7 +38,7 @@ function CountUp({ value, decimals = 0, duration = 1000 }) {
   return <span>{count.toFixed(decimals)}</span>;
 }
 
-export function MetricsPanel({ metrics, avg, onOpenDashboard }) {
+export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboard }) {
   const [page, setPage] = useState(0);
   const [prevMetrics, setPrevMetrics] = useState(metrics);
   const pageSize = 30; // 30 processes max per page to guarantee silky smooth animations
@@ -48,39 +48,61 @@ export function MetricsPanel({ metrics, avg, onOpenDashboard }) {
     setPage(0);
   }
 
+  const maxEndTime = trace.length > 0 ? trace[trace.length - 1].endTime : 0;
+  const throughput = maxEndTime > 0 ? (metrics.length / maxEndTime).toFixed(3) : 0;
+
   const totalPages = Math.ceil(metrics.length / pageSize);
   const displayMetrics = metrics.slice(page * pageSize, (page + 1) * pageSize);
 
   return (
-    <div className="flex flex-col h-full gap-4">
-      <div className="flex-none grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Avg Waiting Time</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-white tracking-tight">
-              <CountUp value={avg.avgWT} decimals={2} duration={800} />
+    <div className="flex flex-col h-full gap-3">
+      {/* Full Final Results Executive Cards */}
+      <div className="flex-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Avg Waiting Time</p>
+          <div className="flex items-baseline gap-1.5">
+            <p className="text-xl font-bold text-white tracking-tight">
+              <CountUp value={avg.avgWT || 0} decimals={2} duration={800} />
             </p>
-            <p className="text-zinc-500 font-medium text-xs">ms</p>
+            <p className="text-zinc-500 font-medium text-[10px]">ms</p>
           </div>
         </div>
         
-        <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Avg Turnaround Time</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-white tracking-tight">
-              <CountUp value={avg.avgTAT} decimals={2} duration={800} />
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Avg Turnaround</p>
+          <div className="flex items-baseline gap-1.5">
+            <p className="text-xl font-bold text-white tracking-tight">
+              <CountUp value={avg.avgTAT || 0} decimals={2} duration={800} />
             </p>
-            <p className="text-zinc-500 font-medium text-xs">ms</p>
+            <p className="text-zinc-500 font-medium text-[10px]">ms</p>
           </div>
         </div>
         
-        <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-800">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">CPU Utilization</p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-white tracking-tight">
-              <CountUp value={avg.cpuUtilization} decimals={2} duration={800} />
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">CPU Utilization</p>
+          <div className="flex items-baseline gap-1.5">
+            <p className="text-xl font-bold text-white tracking-tight">
+              <CountUp value={avg.cpuUtilization || 0} decimals={2} duration={800} />
             </p>
-            <p className="text-zinc-500 font-medium text-xs">%</p>
+            <p className="text-zinc-500 font-medium text-[10px]">%</p>
+          </div>
+        </div>
+
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Total Makespan</p>
+          <div className="flex items-baseline gap-1.5">
+            <p className="text-xl font-bold text-white tracking-tight">
+              <CountUp value={maxEndTime} decimals={0} duration={800} />
+            </p>
+            <p className="text-zinc-500 font-medium text-[10px]">ms</p>
+          </div>
+        </div>
+
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800 col-span-2 sm:col-span-1">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Throughput</p>
+          <div className="flex items-baseline gap-1.5">
+            <p className="text-xl font-bold text-white tracking-tight">{throughput}</p>
+            <p className="text-zinc-500 font-medium text-[10px]">p/ms</p>
           </div>
         </div>
       </div>

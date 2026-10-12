@@ -229,6 +229,7 @@ function App() {
                         <MetricsPanel 
                           metrics={simulationResult.metrics} 
                           avg={simulationResult.averageMetrics} 
+                          trace={simulationResult.trace}
                           onOpenDashboard={() => switchTab('dashboard')}
                         />
                       </div>
