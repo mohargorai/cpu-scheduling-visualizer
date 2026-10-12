@@ -75,7 +75,7 @@ export function GanttChart({ trace }) {
   return (
     <div className="w-full h-full bg-zinc-900/30 rounded-lg border border-zinc-800/50 flex flex-col justify-between overflow-hidden">
       <div className="w-full flex-1 min-h-0 overflow-y-auto custom-scrollbar p-2">
-        <div style={{ height: Math.max(200, displayData.length * 20) }} className="w-full">
+        <div style={{ height: displayData.length <= 6 ? '100%' : `${displayData.length * 26}px`, minHeight: '200px' }} className="w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               layout="vertical"
