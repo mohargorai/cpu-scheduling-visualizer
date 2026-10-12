@@ -1,6 +1,5 @@
 # CPU Scheduling & MLFQ Visualizer — Implementation Documentation
-
-**Document Status:** Complete & Verified  
+  
 **Project:** CPU Scheduling & Multi-Level Feedback Queue (MLFQ) Visualizer  
 **Target Environment:** Node.js, Express, React, Vite, Tailwind CSS  
 **Repository:** [github.com/mohargorai/cpu-scheduling-visualizer](https://github.com/mohargorai/cpu-scheduling-visualizer)  
