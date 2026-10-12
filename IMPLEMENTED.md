@@ -103,7 +103,17 @@ The application follows a decoupled client-server architecture:
   - **Non-Preemptive:** Once dispatched, runs until burst completion.
   - **Preemptive:** Dispatched process is immediately preempted if a higher priority process arrives.
 
-### 2.6 Multi-Level Feedback Queue (MLFQ)
+### 2.6 Multilevel Queue (MLQ)
+- **Class:** Preemptive Multi-Queue without Feedback
+- **Concept:** Divides the ready queue into multiple separate, independent queues based permanently on process characteristics (such as priority or process type).
+  - **Queue 0 ($Q_0$ - System / Interactive):** High priority processes ($\text{Priority} \le 1$). Uses Round Robin with quantum $Q_0 = \text{timeQuantum}$.
+  - **Queue 1 ($Q_1$ - Interactive):** Medium priority processes ($\text{Priority} = 2$). Uses Round Robin with quantum $Q_1 = 2 \times \text{timeQuantum}$.
+  - **Queue 2 ($Q_2$ - Batch):** Low priority processes ($\text{Priority} \ge 3$). Uses First-Come, First-Served (FCFS).
+- **Key Distinctions from MLFQ:**
+  - **Permanent Queue Assignment:** Processes are permanently assigned upon arrival and **never migrate** between queues (zero feedback/demotion).
+  - **Fixed-Priority Preemption:** A lower queue cannot execute unless all higher queues are completely empty. Any arrival into a higher queue immediately preempts execution in lower queues.
+
+### 2.7 Multi-Level Feedback Queue (MLFQ)
 - **Class:** Preemptive, Adaptive Multi-Queue
 - **Concept:** Separates processes into multiple priority queues according to runtime behavior:
   - **Queue 0 ($Q_0$):** Highest priority. Runs Round Robin with time quantum $Q = 2$.

@@ -21,13 +21,14 @@
 
 ## 🚀 Features
 
-- **7 Supported Scheduling Algorithms:**
+- **8 Supported Scheduling Algorithms:**
   - First-Come, First-Served (FCFS)
   - Shortest Job First (SJF - Non-Preemptive)
   - Shortest Remaining Time First (SRTF - Preemptive)
   - Round Robin (RR)
   - Priority Scheduling (Non-Preemptive)
   - Preemptive Priority Scheduling
+  - Multilevel Queue (MLQ)
   - Multi-Level Feedback Queue (MLFQ)
 - **Live Interactive Visualization:**
   - Real-time seamless auto-run simulation: Change any parameter (algorithm, time quantum, add/remove process) and watch all charts update instantly without clicking "Run".

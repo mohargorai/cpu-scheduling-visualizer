@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import { Plus, Trash2, Users, Activity, Upload, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const algorithms = ['FCFS', 'SJF', 'SRTF', 'RR', 'Priority', 'PreemptivePriority', 'MLFQ'];
+const algorithms = ['FCFS', 'SJF', 'SRTF', 'RR', 'Priority', 'PreemptivePriority', 'MLQ', 'MLFQ'];
 
 export function ProcessInput() {
   const { processes, algorithm, config, setAlgorithm, setConfig, addProcess, removeProcess, setProcesses } = useStore();
@@ -88,6 +88,7 @@ export function ProcessInput() {
                     'RR': 'Round Robin (RR)',
                     'Priority': 'Priority (Non-Preemptive)',
                     'PreemptivePriority': 'Priority (Preemptive)',
+                    'MLQ': 'Multilevel Queue (MLQ)',
                     'MLFQ': 'Multi-Level Feedback Queue (MLFQ)'
                   };
                   return <option key={alg} value={alg}>{algNames[alg]}</option>;
@@ -99,7 +100,7 @@ export function ProcessInput() {
             </div>
           </div>
           
-          {(algorithm === 'RR' || algorithm === 'MLFQ') && (
+          {(algorithm === 'RR' || algorithm === 'MLQ' || algorithm === 'MLFQ') && (
             <motion.div 
               initial={{ opacity: 0, height: 0 }} 
               animate={{ opacity: 1, height: 'auto' }} 
@@ -112,6 +113,11 @@ export function ProcessInput() {
                 value={config.timeQuantum === '' ? '' : config.timeQuantum}
                 onChange={(e) => setConfig({ timeQuantum: e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1) })}
               />
+              {algorithm === 'MLQ' && (
+                <p className="text-[10px] text-zinc-500 mt-1.5 leading-relaxed">
+                  Queues: <span className="text-zinc-300">Q0</span> (Priority ≤ 1, RR {config.timeQuantum || 2}), <span className="text-zinc-300">Q1</span> (Priority 2, RR {(config.timeQuantum || 2) * 2}), <span className="text-zinc-300">Q2</span> (Priority ≥ 3, FCFS).
+                </p>
+              )}
             </motion.div>
           )}
         </div>

@@ -4,6 +4,7 @@ const { simulateFCFS } = require('./simulator/fcfs');
 const { simulateSJF } = require('./simulator/sjf');
 const { simulateRR } = require('./simulator/rr');
 const { simulatePriority } = require('./simulator/priority');
+const { simulateMLQ } = require('./simulator/mlq');
 const { simulateMLFQ } = require('./simulator/mlfq');
 
 const app = express();
@@ -40,6 +41,7 @@ app.post('/api/simulate', (req, res) => {
             case 'RR': result = simulateRR(sanitizedProcesses, config?.timeQuantum || 2); break;
             case 'Priority': result = simulatePriority(sanitizedProcesses, false); break;
             case 'PreemptivePriority': result = simulatePriority(sanitizedProcesses, true); break;
+            case 'MLQ': result = simulateMLQ(sanitizedProcesses, config?.quanta || [config?.timeQuantum || 2, (config?.timeQuantum || 2) * 2]); break;
             case 'MLFQ': result = simulateMLFQ(sanitizedProcesses, config?.quanta || [2, 4, 8], config?.agingThreshold || 10); break;
             default: return res.status(400).json({ error: 'Unknown algorithm' });
         }
