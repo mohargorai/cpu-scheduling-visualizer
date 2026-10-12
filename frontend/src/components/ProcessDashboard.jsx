@@ -217,7 +217,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
       {/* Top Banner: Key Executive Performance Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Total Procs</span>
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Total Processes</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-white tracking-tight">{stats.total}</span>
             <span className="text-[10px] text-zinc-500">processes</span>
@@ -225,7 +225,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
         </div>
 
         <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Avg Waiting</span>
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Average Waiting Time</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-white tracking-tight">{stats.avgWT}</span>
             <span className="text-[10px] text-zinc-500">ms</span>
@@ -233,7 +233,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
         </div>
 
         <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Avg Turnaround</span>
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Average Turnaround Time</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-white tracking-tight">{stats.avgTAT}</span>
             <span className="text-[10px] text-zinc-500">ms</span>
@@ -241,7 +241,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
         </div>
 
         <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Avg Response</span>
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Average Response Time</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-white tracking-tight">{stats.avgRT}</span>
             <span className="text-[10px] text-zinc-500">ms</span>
@@ -257,7 +257,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
         </div>
 
         <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Makespan (Time)</span>
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Total Makespan (Time)</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-white tracking-tight">{stats.maxEndTime}</span>
             <span className="text-[10px] text-zinc-500">ms</span>
@@ -265,7 +265,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
         </div>
 
         <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between col-span-2 sm:col-span-1">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Throughput</span>
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">System Throughput</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-white tracking-tight">{stats.throughput}</span>
             <span className="text-[10px] text-zinc-500">p/ms</span>
@@ -395,68 +395,68 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
               <tr className="bg-zinc-900/70 border-b border-zinc-800/80 text-zinc-400 font-semibold select-none">
                 <th onClick={() => handleSort('id')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                   <div className="flex items-center gap-1">
-                    <span>Process</span>
+                    <span>Process ID</span>
                     {sortField === 'id' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                   </div>
                 </th>
                 <th onClick={() => handleSort('arrivalTime')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                   <div className="flex items-center gap-1">
-                    <span>Arrival (AT)</span>
+                    <span>Arrival Time (AT)</span>
                     {sortField === 'arrivalTime' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                   </div>
                 </th>
                 <th onClick={() => handleSort('burstTime')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                   <div className="flex items-center gap-1">
-                    <span>Burst (BT)</span>
+                    <span>Burst Time (BT)</span>
                     {sortField === 'burstTime' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                   </div>
                 </th>
                 <th onClick={() => handleSort('priority')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                   <div className="flex items-center gap-1">
-                    <span>Priority</span>
+                    <span>Priority Level</span>
                     {sortField === 'priority' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                   </div>
                 </th>
                 {isMultiQueue && (
                   <th onClick={() => handleSort('queue')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                     <div className="flex items-center gap-1">
-                      <span>Queue</span>
+                      <span>Assigned Queue</span>
                       {sortField === 'queue' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                     </div>
                   </th>
                 )}
                 <th onClick={() => handleSort('completionTime')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                   <div className="flex items-center gap-1">
-                    <span>Completion (CT)</span>
+                    <span>Completion Time (CT)</span>
                     {sortField === 'completionTime' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                   </div>
                 </th>
                 <th onClick={() => handleSort('turnaroundTime')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                   <div className="flex items-center gap-1">
-                    <span>Turnaround (TAT)</span>
+                    <span>Turnaround Time (TAT)</span>
                     {sortField === 'turnaroundTime' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                   </div>
                 </th>
                 <th onClick={() => handleSort('waitingTime')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                   <div className="flex items-center gap-1">
-                    <span>Waiting (WT)</span>
+                    <span>Waiting Time (WT)</span>
                     {sortField === 'waitingTime' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                   </div>
                 </th>
                 <th onClick={() => handleSort('responseTime')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                   <div className="flex items-center gap-1">
-                    <span>Response (RT)</span>
+                    <span>Response Time (RT)</span>
                     {sortField === 'responseTime' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                   </div>
                 </th>
                 <th onClick={() => handleSort('slices')} className="py-2.5 px-3 cursor-pointer hover:text-white transition-colors">
                   <div className="flex items-center gap-1">
-                    <span>Preemptions</span>
+                    <span>Preemptions / Slices</span>
                     {sortField === 'slices' ? (sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-white" /> : <ArrowDown className="w-3 h-3 text-white" />) : <ArrowUpDown className="w-3 h-3 opacity-30" />}
                   </div>
                 </th>
                 <th className="py-2.5 px-3">
-                  <span>Status</span>
+                  <span>Execution Status</span>
                 </th>
               </tr>
             </thead>

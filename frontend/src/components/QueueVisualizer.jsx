@@ -192,9 +192,9 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
   ];
 
   return (
-    <div className="flex flex-col h-full justify-between select-none gap-2">
+    <div className="flex flex-col h-full justify-between select-none gap-3">
       
-      <div className="flex flex-col gap-2 min-h-0 overflow-y-auto custom-scrollbar pr-0.5">
+      <div className="flex flex-col gap-2.5">
         {/* Top Status & Activity Strip */}
         <div className="shrink-0 flex items-center justify-between gap-2 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg text-xs">
           <div className="flex items-center gap-2 truncate">

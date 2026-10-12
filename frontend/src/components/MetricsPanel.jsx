@@ -59,7 +59,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboa
       {/* Full Final Results Executive Cards */}
       <div className="flex-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
         <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Avg Waiting Time</p>
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Waiting Time</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-white tracking-tight">
               <CountUp value={avg.avgWT || 0} decimals={2} duration={800} />
@@ -69,7 +69,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboa
         </div>
         
         <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Avg Turnaround</p>
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Turnaround Time</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-white tracking-tight">
               <CountUp value={avg.avgTAT || 0} decimals={2} duration={800} />
@@ -99,7 +99,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboa
         </div>
 
         <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800 col-span-2 sm:col-span-1">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Throughput</p>
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">System Throughput</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-white tracking-tight">{throughput}</p>
             <p className="text-zinc-500 font-medium text-[10px]">p/ms</p>

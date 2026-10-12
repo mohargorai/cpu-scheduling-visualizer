@@ -187,21 +187,21 @@ function App() {
                     animate="show"
                     className="flex flex-col gap-5 h-full"
                   >
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                      <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[440px] min-h-0">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+                      <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col min-h-[480px]">
                         <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                           Execution Timeline
                         </h2>
-                        <div className="flex-1 min-h-0">
+                        <div className="flex-1 min-h-[420px] flex flex-col">
                           <GanttChart trace={simulationResult.trace} />
                         </div>
                       </motion.div>
                       
-                      <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col h-[440px] min-h-0">
+                      <motion.div variants={itemVariants} className="bg-zinc-950 p-4 sm:p-5 rounded-xl border border-zinc-900 flex flex-col min-h-[480px]">
                         <h2 className="flex-none text-sm font-semibold mb-3 text-white flex items-center gap-2">
                           Live Queues & States
                         </h2>
-                        <div className="flex-1 min-h-0">
+                        <div className="flex-1 flex flex-col">
                           <QueueVisualizer 
                             trace={simulationResult.trace} 
                             processes={processes} 
