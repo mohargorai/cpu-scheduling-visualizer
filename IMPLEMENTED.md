@@ -42,16 +42,18 @@ The application follows a decoupled client-server architecture:
 |  | Express Router + DoS & Sanitization Middleware (Max 1,500 procs per batch)|  |
 |  +-------------------------------------+-------------------------------------+  |
 |                                        |                                        |
-|                 +----------------------+----------------------+                 |
-|                 |                                             |                 |
-|                 v                                             v                 |
-|  +-------------------------------+             +-----------------------------+  |
-|  |  Standard Schedulers          |             |  Multi-Queue Engines        |  |
-|  |  - FCFS, SJF, SRTF            |             |  - MLQ (Static Partitioning)|  |
-|  |  - Round Robin (RR)           |             |  - MLFQ (Dynamic Feedback)  |  |
-|  |  - Priority (Preempt/Non)     |             |  - Aging & Quantum Demotion |  |
-|  +-------------------------------+             +-----------------------------+  |
-|                 |                                             |                 |
+|         +------------------------------+------------------------------+         |
+|         |                              |                              |         |
+|         v                              v                              v         |
+|  +---------------------+      +---------------------+      +---------------------+  |
+|  | Single-Queue Engine |      | Multilevel Queue MLQ|      | Multi-Level Feedback|  |
+|  | - FCFS, SJF, SRTF   |      | - Static Partition  |      |   Queue (MLFQ)      |  |
+|  | - Round Robin (RR)  |      | - Fixed Preemption  |      | - Dynamic Demotion  |  |
+|  | - Priority Sched    |      | - Q0/Q1(RR), Q2(FCFS|      | - Starvation Aging  |  |
+|  +---------------------+      +---------------------+      +---------------------+  |
+|         |                              |                              |         |
+|         +------------------------------+------------------------------+         |
+|                                        v                                        |
 |                 +-------------------------------------------------------------+  |
 |                 | Pure In-Memory Discrete Event Simulation (Zero DB Overhead) |  |
 |                 +-------------------------------------------------------------+  |
@@ -103,17 +105,59 @@ The application follows a decoupled client-server architecture:
   - **Non-Preemptive:** Once dispatched, runs until burst completion.
   - **Preemptive:** Dispatched process is immediately preempted if a higher priority process arrives.
 
-### 2.6 Multilevel Queue (MLQ)
+---
+
+### 2.6 Multilevel Queue (MLQ) Engine
 - **Class:** Preemptive Partitioned Multi-Queue
-- **Concept:** The ready queue is partitioned into separate, permanently assigned queues based on process attributes (Priority / Type). Unlike MLFQ, processes **never migrate or demote** between queues.
+- **Concept:** The ready queue is partitioned into permanently separated priority queues based on intrinsic process attributes (Priority / Classification). Unlike MLFQ, processes **never migrate or demote** across queues.
+
+#### Visual Architecture & Execution Flow:
+```
+[ Incoming Processes ]
+         │
+         ├──► Priority <= 1  ──► [ Queue 0: Round Robin (Q=2) ] ──┐ (Highest Priority)
+         │                                                        │
+         ├──► Priority == 2  ──► [ Queue 1: Round Robin (Q=4) ] ──┼──► [ CPU Core ]
+         │                                                        │    (Fixed-Priority Preemption)
+         └──► Priority >= 3  ──► [ Queue 2: FCFS (Batch Load) ] ──┘ (Lowest Priority)
+
+* KEY MECHANISM: Processes remain permanently in their assigned queue.
+  If a higher-priority queue becomes non-empty, any executing process
+  in a lower queue is preempted immediately and returned to its queue.
+```
+
+- **Queue Structure:**
   - **Queue 0 ($Q_0$ - System / High Priority, Priority $\le$ 1):** Round Robin with Time Quantum $Q_0 = 2$.
   - **Queue 1 ($Q_1$ - Interactive / Medium Priority, Priority = 2):** Round Robin with Time Quantum $Q_1 = 4$.
   - **Queue 2 ($Q_2$ - Batch / Low Priority, Priority $\ge$ 3):** First-Come, First-Served (FCFS).
-- **Inter-Queue Scheduling:** Fixed priority preemptive scheduling ($Q_0 > Q_1 > Q_2$). If a higher-priority process arrives in a higher queue, executing lower-queue processes are immediately preempted and returned to their respective queue.
+- **Inter-Queue Scheduling:** Fixed priority preemptive scheduling ($Q_0 > Q_1 > Q_2$).
 
-### 2.7 Multi-Level Feedback Queue (MLFQ)
-- **Class:** Preemptive, Adaptive Multi-Queue
-- **Concept:** Separates processes into multiple priority queues according to runtime behavior:
+---
+
+### 2.7 Multi-Level Feedback Queue (MLFQ) Engine
+- **Class:** Preemptive, Adaptive Feedback Multi-Queue
+- **Concept:** Separates processes into multiple priority queues according to runtime CPU behavior and dynamically adjusts priority:
+
+#### Visual Architecture & Execution Flow:
+```
+[ All Incoming Processes ] ──► Enter at Highest Priority Level
+                                         │
+                                         ▼
+                   ┌──────────► [ Queue 0 (Q = 2) ] ──► Finished? ──► [ Terminated ]
+                   │                     │
+                   │               Quantum Expired (Demote)
+                   │                     ▼
+                   │            [ Queue 1 (Q = 4) ] ──► Finished? ──► [ Terminated ]
+             Aging Boost                 │
+        (Wait >= 10 ticks)         Quantum Expired (Demote)
+                   │                     ▼
+                   └─────────── [ Queue 2 (Q = 8 / FCFS) ] ──► Finished? ──► [ Terminated ]
+
+* KEY MECHANISM: Processes dynamically migrate between queues based on CPU burst history.
+  CPU-bound jobs descend to lower tiers, while starved jobs are promoted via aging.
+```
+
+- **Queue Structure:**
   - **Queue 0 ($Q_0$):** Highest priority. Runs Round Robin with time quantum $Q = 2$.
   - **Queue 1 ($Q_1$):** Medium priority. Runs Round Robin with time quantum $Q = 4$.
   - **Queue 2 ($Q_2$):** Lowest priority. Runs Round Robin with time quantum $Q = 8$ (or FCFS fallback).
