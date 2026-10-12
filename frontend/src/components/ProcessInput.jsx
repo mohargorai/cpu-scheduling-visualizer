@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useStore } from '../store';
-import { Plus, Trash2, Users, Activity, Upload, Settings, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Users, Activity, Upload, Settings, Sparkles, Zap, Shuffle, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const algorithms = ['FCFS', 'SJF', 'SRTF', 'RR', 'Priority', 'PreemptivePriority', 'MLQ', 'MLFQ'];
@@ -339,15 +339,15 @@ export function ProcessInput() {
         <div className="flex-none bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/80 mb-3">
           <div className="grid grid-cols-3 gap-2.5 mb-3">
             <div>
-              <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Arrival</label>
+              <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400 mb-1">Arrival</label>
               <input type="number" min="0" value={newProcess.arrivalTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({...newProcess, arrivalTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
-              <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Burst</label>
+              <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400 mb-1">Burst</label>
               <input type="number" min="1" value={newProcess.burstTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({...newProcess, burstTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
-              <label className="block text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">Priority</label>
+              <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400 mb-1">Priority</label>
               <input type="number" min="1" value={newProcess.priority} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({...newProcess, priority: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
           </div>
@@ -380,52 +380,64 @@ export function ProcessInput() {
         </div>
 
         {/* Quick Workload Presets & Workload Summary */}
-        <div className="flex-none bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/80">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500 flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-zinc-400" />
+        <div className="flex-none bg-zinc-900/40 p-3.5 rounded-xl border border-zinc-800/80">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs uppercase tracking-wider font-bold text-zinc-300 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-zinc-400" />
               Quick Workload Presets
             </span>
-            <span className="text-[9px] font-semibold text-zinc-500">
-              Total Burst: {totalBurst} ms
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700">
+              Total Burst: <strong className="text-white font-bold">{totalBurst} ms</strong>
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={loadStandardMix}
-              className="text-left p-1.5 rounded bg-zinc-950/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+              className="group text-left p-2.5 sm:p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white transition-all shadow-sm"
             >
-              <p className="text-[11px] font-bold">Balanced Mix</p>
-              <p className="text-[9px] text-zinc-500">5 procs (bursts 3-8ms)</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Zap className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+                <p className="text-xs sm:text-sm font-bold text-white">Balanced Mix</p>
+              </div>
+              <p className="text-xs text-zinc-400">5 procs (bursts 3–8 ms)</p>
             </button>
 
             <button
               type="button"
               onClick={loadMultiQueueMix}
-              className="text-left p-1.5 rounded bg-zinc-950/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+              className="group text-left p-2.5 sm:p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white transition-all shadow-sm"
             >
-              <p className="text-[11px] font-bold">Interactive & Batch</p>
-              <p className="text-[9px] text-zinc-500">MLQ / MLFQ tier demo</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Layers className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+                <p className="text-xs sm:text-sm font-bold text-white">Interactive & Batch</p>
+              </div>
+              <p className="text-xs text-zinc-400">MLQ / MLFQ tier demo</p>
             </button>
 
             <button
               type="button"
               onClick={loadPriorityTiersMix}
-              className="text-left p-1.5 rounded bg-zinc-950/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+              className="group text-left p-2.5 sm:p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white transition-all shadow-sm"
             >
-              <p className="text-[11px] font-bold">Priority Tiers</p>
-              <p className="text-[9px] text-zinc-500">Varied priorities P1-P4</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Activity className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+                <p className="text-xs sm:text-sm font-bold text-white">Priority Tiers</p>
+              </div>
+              <p className="text-xs text-zinc-400">Varied priorities P1–P4</p>
             </button>
 
             <button
               type="button"
               onClick={generateRandomWorkload}
-              className="text-left p-1.5 rounded bg-zinc-950/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
+              className="group text-left p-2.5 sm:p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white transition-all shadow-sm"
             >
-              <p className="text-[11px] font-bold">Random 10 Procs</p>
-              <p className="text-[9px] text-zinc-500">Randomized workload</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Shuffle className="w-3.5 h-3.5 text-zinc-400 group-hover:text-white transition-colors" />
+                <p className="text-xs sm:text-sm font-bold text-white">Random 10 Procs</p>
+              </div>
+              <p className="text-xs text-zinc-400">Randomized workload</p>
             </button>
           </div>
         </div>
