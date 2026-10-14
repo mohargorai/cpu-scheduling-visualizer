@@ -6,6 +6,7 @@ import { GanttChart } from './GanttChart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Sparkles, Loader2, Download, Scale } from 'lucide-react';
 import { exportSimulationReport } from '../utils/reportExporter';
+import { runSimulationEngine } from '../simulator';
 
 const ALGORITHMS = [
   { id: 'FCFS', name: 'First-Come, First-Served (FCFS)' },
@@ -26,21 +27,39 @@ export function AlgorithmComparison() {
   const [resultB, setResultB] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
   const runComparison = async () => {
     if (processes.length === 0) return;
     setLoading(true);
     try {
-      const [resA, resB] = await Promise.all([
-        axios.post(`${API_URL}/api/simulate`, { algorithm: algoA, processes, config }),
-        axios.post(`${API_URL}/api/simulate`, { algorithm: algoB, processes, config })
-      ]);
-      setResultA(resA.data);
-      setResultB(resB.data);
+      let resDataA = null;
+      let resDataB = null;
+
+      const API_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:5000' : '');
+      if (API_URL) {
+        try {
+          const [resA, resB] = await Promise.all([
+            axios.post(`${API_URL}/api/simulate`, { algorithm: algoA, processes, config }, { timeout: 2500 }),
+            axios.post(`${API_URL}/api/simulate`, { algorithm: algoB, processes, config }, { timeout: 2500 })
+          ]);
+          if (resA?.data?.trace && resB?.data?.trace) {
+            resDataA = resA.data;
+            resDataB = resB.data;
+          }
+        } catch (apiErr) {
+          console.warn("Backend API unreachable for comparison, using client simulation engine:", apiErr.message);
+        }
+      }
+
+      if (!resDataA || !resDataB) {
+        resDataA = runSimulationEngine({ algorithm: algoA, processes, config });
+        resDataB = runSimulationEngine({ algorithm: algoB, processes, config });
+      }
+
+      setResultA(resDataA);
+      setResultB(resDataB);
     } catch (err) {
       console.error(err);
-      alert('Failed to simulate algorithms for comparison.');
+      alert('Failed to simulate algorithms for comparison: ' + err.message);
     } finally {
       setLoading(false);
     }

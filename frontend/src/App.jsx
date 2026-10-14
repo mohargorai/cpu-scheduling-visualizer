@@ -10,6 +10,7 @@ import { AlgorithmComparison } from './components/AlgorithmComparison';
 import { Play, Loader2, Layers, LayoutGrid, TableProperties, Scale, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { exportSimulationReport } from './utils/reportExporter';
+import { runSimulationEngine } from './simulator';
 
 function App() {
   const { processes, algorithm, config, setSimulationResult, simulationResult } = useStore();
@@ -59,24 +60,42 @@ function App() {
   const runSimulation = async () => {
     setLoading(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const res = await axios.post(`${API_URL}/api/simulate`, {
-        algorithm,
-        processes,
-        config
-      });
+      let data = null;
+
+      // 1. If backend URL is specified or on localhost, attempt API request with 2.5s timeout
+      const API_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:5000' : '');
+      if (API_URL) {
+        try {
+          const res = await axios.post(`${API_URL}/api/simulate`, {
+            algorithm,
+            processes,
+            config
+          }, { timeout: 2500 });
+          if (res?.data?.trace) {
+            data = res.data;
+          }
+        } catch (apiErr) {
+          console.warn("Backend API unreachable, using client simulation engine:", apiErr.message);
+        }
+      }
+
+      // 2. If no backend response (e.g. Render static site or offline), run directly via client simulation engine
+      if (!data) {
+        data = runSimulationEngine({ algorithm, processes, config });
+      }
+
       if (!simulationResult) {
         setTimeout(() => {
-          setSimulationResult(res.data);
+          setSimulationResult(data);
           setLoading(false);
-        }, 400); 
+        }, 300); 
       } else {
-        setSimulationResult(res.data);
+        setSimulationResult(data);
         setLoading(false);
       }
     } catch (err) {
-      console.error(err);
-      alert("Simulation failed. Make sure backend is running.");
+      console.error("Simulation failed:", err);
+      alert("Simulation failed: " + err.message);
       setLoading(false);
     }
   };
