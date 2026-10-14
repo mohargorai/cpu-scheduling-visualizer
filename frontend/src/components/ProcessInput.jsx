@@ -3,8 +3,6 @@ import { useStore } from '../store';
 import { Plus, Trash2, Users, Activity, Upload, Settings, Cpu, Shuffle, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const algorithms = ['FCFS', 'SJF', 'SRTF', 'RR', 'Priority', 'PreemptivePriority', 'MLQ', 'MLFQ'];
-
 export function ProcessInput() {
   const { processes, algorithm, config, setAlgorithm, setConfig, addProcess, removeProcess, setProcesses } = useStore();
   const [newProcess, setNewProcess] = useState({ arrivalTime: 0, burstTime: 5, priority: 1 });

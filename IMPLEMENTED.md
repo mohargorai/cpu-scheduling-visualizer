@@ -203,11 +203,17 @@ $$\text{Turnaround Time (TAT)}_i = \text{Completion Time (CT)}_i - \text{Arrival
 
 $$\text{Waiting Time (WT)}_i = \text{Turnaround Time (TAT)}_i - \text{Burst Time (B)}_i$$
 
+$$\text{Response Time (RT)}_i = \text{Time of First CPU Dispatch}_i - \text{Arrival Time (A)}_i$$
+
 $$\text{Average Turnaround Time} = \frac{1}{N} \sum_{i=1}^{N} \text{TAT}_i$$
 
 $$\text{Average Waiting Time} = \frac{1}{N} \sum_{i=1}^{N} \text{WT}_i$$
 
+$$\text{Average Response Time} = \frac{1}{N} \sum_{i=1}^{N} \text{RT}_i$$
+
 $$\text{CPU Utilization (\%)} = \left( \frac{\text{Total Simulation Time} - \text{Total Idle Time}}{\text{Total Simulation Time}} \right) \times 100\%$$
+
+$$\text{Throughput} = \frac{\text{Completed Processes}}{\text{Total Simulation Makespan}}$$
 
 ---
 
@@ -215,25 +221,32 @@ $$\text{CPU Utilization (\%)} = \left( \frac{\text{Total Simulation Time} - \tex
 
 | Component | File Path | Responsibilities & Implementations |
 | :--- | :--- | :--- |
-| **App Layout & Orchestrator** | `frontend/src/App.jsx` | Houses the top navigation, simulation triggers, auto-run state management, tab routing, and responsive shell. |
-| **Process Input & Workload** | `frontend/src/components/ProcessInput.jsx` | - Manual process addition with Enter-key auto-submission.<br>- Fast backspacing numeric fields.<br>- Dropdown with full academic names & abbreviations.<br>- CSV / JSON bulk file importer.<br>- Preset workload generators (CPU-heavy, I/O burst, mixed). |
-| **Interactive Queue Visualizer** | `frontend/src/components/QueueVisualizer.jsx` | - Real-time step-by-step playback.<br>- O(log N) binary search scrubber.<br>- Multi-speed playback rates (0.5x, 1x, 2x, 5x, 10x, 50x, 100x, 500x).<br>- Dynamic display of CPU slot and Q0, Q1, Q2 multilevel queues. |
-| **Gantt Timeline Chart** | `frontend/src/components/GanttChart.jsx` | - Color-coded execution blocks with process IDs and durations.<br>- Context switch and idle markers.<br>- 100 blocks/page pagination to eliminate layout thrashing. |
-| **Metrics & Analytics Dashboard** | `frontend/src/components/MetricsPanel.jsx` | - 4 KPI overview cards (Avg TAT, Avg WT, CPU Util %, Total Time).<br>- Recharts bar chart for turnaround vs. waiting time.<br>- Paginated process detail table (30 items/page). |
+| **App Layout & Orchestrator** | `frontend/src/App.jsx` | Houses the top navigation, simulation triggers, auto-run state management, dual-tab routing (Visualizer vs. Process Dashboard), and responsive shell. |
+| **Process Input & Workload** | `frontend/src/components/ProcessInput.jsx` | - Manual process addition with Enter-key auto-submission.<br>- Fast backspacing numeric fields.<br>- Dropdown with full academic names & abbreviations.<br>- CSV / JSON bulk file importer.<br>- **Algorithm-Tailored Workload Engine:** Generates calibrated 10-process workloads specifically configured to trigger each algorithm's edge cases and mechanics. |
+| **Interactive Queue Visualizer** | `frontend/src/components/QueueVisualizer.jsx` | - Real-time step-by-step playback with Play/Pause and single-step scrubbing.<br>- O(log N) binary search scrubber.<br>- Multi-speed playback rates (0.5x, 1x, 2x, 5x, 10x, 50x, 100x, 500x).<br>- Dynamic display of CPU slot and Q0, Q1, Q2 multilevel queues.<br>- **Anti-Jitter Geometry:** Pixel-locked height constraints (`h-[62px]`, `.no-scrollbar`) eliminating layout jumps during playback. |
+| **Gantt Timeline Chart** | `frontend/src/components/GanttChart.jsx` | - Color-coded execution blocks with process IDs and durations.<br>- Context switch and idle markers.<br>- 15 blocks/page pagination to eliminate layout thrashing.<br>- Hardware-accelerated static SVG rendering (`isAnimationActive={false}`) for 60fps playback. |
+| **Comparative Analytics** | `frontend/src/components/MetricsPanel.jsx` | - 5 KPI overview cards (Avg WT, Avg TAT, CPU Util %, Makespan, Throughput).<br>- Recharts bar chart for turnaround vs. waiting time.<br>- Paginated process detail table (30 items/page). |
+| **Process Analytics Dashboard** | `frontend/src/components/ProcessDashboard.jsx` | - Dedicated full-fidelity telemetry table with per-process CT, TAT, WT, RT, and preemption slice counts.<br>- Instant multi-column sorting & real-time ID search filtering.<br>- One-click export to CSV & JSON for research benchmarking.<br>- Recharts comparative Turnaround vs. Waiting vs. Response time distribution graph. |
 | **Zustand State Store** | `frontend/src/store.js` | Centralized reactive store managing process list, selected algorithm, quantum configs, and simulation results. |
 
 ---
 
 ## 6. Performance Engineering & Optimizations
 
-1. **O(1) Incremental ID Generation:** Replaced $O(N)$ regex scanning of process IDs with a tracking counter, enabling instantaneous additions even when 5,000+ processes are loaded.
+1. **O(1) Incremental ID Generation:** Replaced $O(N)$ regex scanning of process IDs with a tracking counter, enabling instantaneous additions even when 1,500+ processes are loaded.
 2. **O(log N) Timeline State Scrubbing:** Implemented binary search over execution trace intervals for instant timeline seek times at 60fps.
 3. **Trace Merging Algorithm:** A single-pass contiguous trace consolidation algorithm merges adjacent slices of the same process, reducing memory overhead and Gantt DOM node count by up to 80%.
-4. **DOM Virtualization & Pagination:**
-   - Gantt Chart paginated to 100 blocks per page.
+4. **Anti-Jitter Geometry & Scrollbar Stabilization:**
+   - Enforced strict fixed container heights on queue cards (`h-[62px]`, tracks `h-[32px]`), CPU slot (`min-h-[190px]`), and terminated tray (`h-[40px]`).
+   - Integrated `.no-scrollbar` styling (`scrollbar-width: none; &::-webkit-scrollbar: hidden`) to prevent OS-native 14px scrollbar popping in and out when processes enter or leave queues.
+5. **Recharts Render Pipeline Streamlining:**
+   - Disabled heavy 800ms Recharts SVG animation cascades during live playback (`isAnimationActive={false}`) to eliminate frame drops and UI stutter.
+   - Removed 240-fps `requestAnimationFrame` loops in favor of lightweight direct telemetry rendering.
+6. **DOM Virtualization & Pagination:**
+   - Gantt Chart paginated to 15 blocks per page.
    - Metrics Table paginated to 30 rows per page.
-   - Prevents browser crashes and ensures smooth rendering across large enterprise test datasets.
-5. **API Security & DoS Protection:**
+   - Process Dashboard paginated to configurable 10/25/50/100/All items per page.
+7. **API Security & DoS Protection:**
    - Strict payload validation on `POST /api/simulate`.
    - Max 1,500 processes per batch to prevent server thread blocking.
    - Strict numerical sanitization preventing NoSQL injection and invalid inputs.
@@ -242,7 +255,7 @@ $$\text{CPU Utilization (\%)} = \left( \frac{\text{Total Simulation Time} - \tex
 
 ## 7. Complete Technology Stack & Tools Used
 
-### 6.1 Frontend
+### 7.1 Frontend
 - **React 18:** Modern declarative UI library using functional hooks.
 - **Vite 6:** Ultra-fast ES module development server and Rollup production bundler.
 - **Tailwind CSS v4:** Utility-first modern CSS framework for responsive dark theme design.
@@ -251,10 +264,11 @@ $$\text{CPU Utilization (\%)} = \left( \frac{\text{Total Simulation Time} - \tex
 - **Recharts:** Composable SVG charting library for metrics visualization.
 - **Lucide React:** Clean icon system.
 
-### 6.2 Backend & Data Layer
+### 7.2 Backend & Data Layer
 - **Node.js (v24):** Event-driven server runtime environment.
 - **Express.js:** Minimalist REST API web framework.
 - **Architecture:** 100% In-Memory Simulation Pipeline (Zero database overhead, high throughput).
 
-### 6.3 Tooling & Build Environment
+### 7.3 Tooling & Build Environment
 - **Git & GitHub:** Distributed version control and remote deployment tracking.
+

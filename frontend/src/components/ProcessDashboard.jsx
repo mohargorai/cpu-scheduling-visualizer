@@ -2,9 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useStore } from '../store';
 import { 
   Search, Download, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight,
-  Clock, Activity, BarChart3, CheckCircle2, FileSpreadsheet, Layers, Play, Loader2
+  Clock, Play, Loader2, FileSpreadsheet, CheckCircle2, BarChart3
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 export function ProcessDashboard({ onRunSimulation, loading }) {
@@ -591,9 +590,9 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
                   itemStyle={{ fontWeight: '500', color: '#fafafa' }}
                 />
                 <Legend wrapperStyle={{ paddingTop: '5px', fontSize: '11px' }} iconType="circle" />
-                <Bar dataKey="turnaroundTime" name="Turnaround Time (ms)" fill="#e4e4e7" radius={[2, 2, 0, 0]} barSize={16} />
-                <Bar dataKey="waitingTime" name="Waiting Time (ms)" fill="#71717a" radius={[2, 2, 0, 0]} barSize={16} />
-                <Bar dataKey="responseTime" name="Response Time (ms)" fill="#3f3f46" radius={[2, 2, 0, 0]} barSize={16} />
+                <Bar dataKey="turnaroundTime" name="Turnaround Time (ms)" fill="#e4e4e7" radius={[2, 2, 0, 0]} barSize={16} isAnimationActive={false} />
+                <Bar dataKey="waitingTime" name="Waiting Time (ms)" fill="#71717a" radius={[2, 2, 0, 0]} barSize={16} isAnimationActive={false} />
+                <Bar dataKey="responseTime" name="Response Time (ms)" fill="#3f3f46" radius={[2, 2, 0, 0]} barSize={16} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>

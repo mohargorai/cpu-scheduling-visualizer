@@ -9,6 +9,7 @@ body {
 /* Custom scrollbar for queues */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
+  height: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
@@ -16,4 +17,15 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #27272a;
   border-radius: 20px;
+}
+
+/* Hide scrollbars completely while preserving scrolling capability */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

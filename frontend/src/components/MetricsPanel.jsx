@@ -1,52 +1,19 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import React, { useEffect, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-function CountUp({ value, decimals = 0, duration = 1000 }) {
-  const [count, setCount] = useState(0);
-  const prevValueRef = useRef(0);
-
-  useEffect(() => {
-    let startTimestamp = null;
-    let animationFrameId;
-    const startValue = prevValueRef.current;
-    prevValueRef.current = value;
-    
-    const step = (timestamp) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      
-      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      const currentCount = startValue + (value - startValue) * ease;
-      
-      setCount(currentCount);
-      
-      if (progress < 1) {
-        animationFrameId = window.requestAnimationFrame(step);
-      } else {
-        setCount(value);
-      }
-    };
-    
-    animationFrameId = window.requestAnimationFrame(step);
-    
-    return () => {
-      window.cancelAnimationFrame(animationFrameId);
-    };
-  }, [value, duration]);
-
-  return <span>{count.toFixed(decimals)}</span>;
+function CountUp({ value, decimals = 0 }) {
+  const num = typeof value === 'number' ? value : Number(value || 0);
+  return <span>{num.toFixed(decimals)}</span>;
 }
 
-export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboard }) {
+export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
   const [page, setPage] = useState(0);
-  const [prevMetrics, setPrevMetrics] = useState(metrics);
-  const pageSize = 30; // 30 processes max per page to guarantee silky smooth animations
+  const pageSize = 30;
 
-  if (prevMetrics !== metrics) {
-    setPrevMetrics(metrics);
+  useEffect(() => {
     setPage(0);
-  }
+  }, [metrics]);
 
   const maxEndTime = trace.length > 0 ? trace[trace.length - 1].endTime : 0;
   const throughput = maxEndTime > 0 ? (metrics.length / maxEndTime).toFixed(3) : 0;
@@ -62,7 +29,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboa
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Waiting Time</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-white tracking-tight">
-              <CountUp value={avg.avgWT || 0} decimals={2} duration={800} />
+              <CountUp value={avg.avgWT || 0} decimals={2} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
           </div>
@@ -72,7 +39,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboa
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Turnaround Time</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-white tracking-tight">
-              <CountUp value={avg.avgTAT || 0} decimals={2} duration={800} />
+              <CountUp value={avg.avgTAT || 0} decimals={2} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
           </div>
@@ -82,7 +49,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboa
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">CPU Utilization</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-white tracking-tight">
-              <CountUp value={avg.cpuUtilization || 0} decimals={2} duration={800} />
+              <CountUp value={avg.cpuUtilization || 0} decimals={2} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">%</p>
           </div>
@@ -92,7 +59,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboa
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Total Makespan</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-white tracking-tight">
-              <CountUp value={maxEndTime} decimals={0} duration={800} />
+              <CountUp value={maxEndTime} decimals={0} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
           </div>
@@ -139,9 +106,8 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [], onOpenDashboa
                 contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', fontSize: '12px' }}
                 itemStyle={{ fontWeight: '500', color: '#fafafa' }}
               />
-              <Legend wrapperStyle={{ paddingTop: '5px', fontSize: '11px' }} iconType="circle" />
-              <Bar dataKey="waitingTime" name="Waiting Time" fill="#d4d4d8" radius={[2, 2, 0, 0]} barSize={20} isAnimationActive={true} animationDuration={800} />
-              <Bar dataKey="turnaroundTime" name="Turnaround Time" fill="#52525b" radius={[2, 2, 0, 0]} barSize={20} isAnimationActive={true} animationDuration={800} />
+              <Bar dataKey="waitingTime" name="Waiting Time" fill="#d4d4d8" radius={[2, 2, 0, 0]} barSize={20} isAnimationActive={false} />
+              <Bar dataKey="turnaroundTime" name="Turnaround Time" fill="#52525b" radius={[2, 2, 0, 0]} barSize={20} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>

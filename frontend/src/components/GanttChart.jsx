@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -33,13 +33,11 @@ const CustomTooltip = ({ active, payload }) => {
 
 export function GanttChart({ trace }) {
   const [page, setPage] = useState(0);
-  const [prevTrace, setPrevTrace] = useState(trace);
   const pageSize = 15;
 
-  if (prevTrace !== trace) {
-    setPrevTrace(trace);
+  useEffect(() => {
     setPage(0);
-  }
+  }, [trace]);
 
   const { totalPages, displayData } = useMemo(() => {
     if (!trace || trace.length === 0) {
@@ -72,21 +70,29 @@ export function GanttChart({ trace }) {
 
   if (!trace || trace.length === 0) return <div className="text-zinc-600 h-full flex items-center justify-center font-medium">No trace available</div>;
 
+  const barSize = useMemo(() => {
+    const count = displayData.length || 1;
+    if (count <= 4) return 24;
+    if (count <= 7) return 22;
+    if (count <= 11) return 18;
+    return 15;
+  }, [displayData.length]);
+
   return (
     <div className="w-full h-full bg-zinc-900/30 rounded-lg border border-zinc-800/50 flex flex-col justify-between overflow-hidden">
-      <div className="w-full flex-1 min-h-0 overflow-y-auto custom-scrollbar p-2">
-        <div style={{ height: displayData.length <= 6 ? '100%' : `${displayData.length * 26}px`, minHeight: '200px' }} className="w-full">
+      <div className="w-full flex-1 min-h-0 p-2.5">
+        <div className="w-full h-full min-h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               layout="vertical"
               data={displayData}
-              margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+              margin={{ top: 8, right: 12, left: -20, bottom: 4 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={false} />
               <XAxis type="number" stroke="#71717a" tickLine={false} axisLine={false} tick={{fill: '#a1a1aa', fontSize: 11}} />
               <YAxis dataKey="name" type="category" stroke="#71717a" tickLine={false} axisLine={false} width={50} tick={{fontWeight: '500', fill: '#d4d4d8', fontSize: 11}} />
               <Tooltip content={<CustomTooltip />} cursor={{fill: '#18181b', opacity: 0.5}} />
-              <Bar dataKey="duration" radius={[2, 2, 2, 2]} barSize={16} isAnimationActive={true} animationDuration={800}>
+              <Bar dataKey="duration" radius={[2, 2, 2, 2]} barSize={barSize} isAnimationActive={false}>
                 {displayData.map((entry, index) => (
                   <Cell key={`cell-${page}-${index}`} fill={getColor(entry.name)} />
                 ))}

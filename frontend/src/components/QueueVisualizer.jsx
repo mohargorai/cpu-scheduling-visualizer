@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Play, Pause, SkipBack, SkipForward, StepBack, StepForward, 
-  Cpu, ArrowDown, ArrowUp, CheckCircle2, Activity, Layers
+  Cpu, ArrowDown, ArrowUp, CheckCircle2, Activity
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS', simulationResult = null }) {
   const [currentTime, setCurrentTime] = useState(0);
@@ -14,25 +14,28 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
   const isMultiQueue = algorithm === 'MLQ' || algorithm === 'MLFQ';
 
   useEffect(() => {
-    let interval;
-    if (isPlaying && currentTime < maxTime) {
-      const tickDurationMs = 500 / speedMultiplier;
-      const intervalTime = Math.max(50, tickDurationMs);
-      const step = Math.max(1, Math.round(intervalTime / tickDurationMs));
+    if (!isPlaying) return;
+    const tickDurationMs = 500 / speedMultiplier;
+    const intervalTime = Math.max(50, tickDurationMs);
+    const step = Math.max(1, Math.round(intervalTime / tickDurationMs));
 
-      interval = setInterval(() => {
-        setCurrentTime((t) => {
-          const next = t + step;
-          if (next >= maxTime) {
-            setIsPlaying(false);
-            return maxTime;
-          }
-          return next;
-        });
-      }, intervalTime);
-    }
+    const interval = setInterval(() => {
+      setCurrentTime((t) => {
+        if (t >= maxTime) {
+          setIsPlaying(false);
+          return maxTime;
+        }
+        const next = t + step;
+        if (next >= maxTime) {
+          setIsPlaying(false);
+          return maxTime;
+        }
+        return next;
+      });
+    }, intervalTime);
+
     return () => clearInterval(interval);
-  }, [isPlaying, currentTime, maxTime, speedMultiplier]);
+  }, [isPlaying, maxTime, speedMultiplier]);
 
   // Reset time when algorithm or trace changes
   useEffect(() => {
@@ -221,15 +224,15 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
 
               return (
                 <div key={meta.name} className="flex flex-col gap-1">
-                  {/* Queue Row Box */}
+                  {/* Queue Row Box - Locked height to prevent content jumping */}
                   <div 
-                    className={`p-1.5 rounded-lg border transition-colors ${
+                    className={`${isMultiQueue ? 'h-[62px]' : 'h-[110px]'} p-1.5 rounded-lg border transition-colors flex flex-col justify-between shrink-0 ${
                       isCpuSource 
                         ? 'border-zinc-600 bg-zinc-900/90 shadow-[0_0_10px_rgba(255,255,255,0.03)]' 
                         : `${meta.border}`
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="h-[18px] flex items-center justify-between shrink-0">
                       <div className="flex items-center gap-1.5">
                         <span className="text-[11px] font-bold text-white tracking-wide">{meta.name}</span>
                         <span className="text-[8.5px] font-semibold px-1 py-0.2 rounded border bg-zinc-800 text-zinc-300 border-zinc-700">
@@ -240,40 +243,34 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
                         </span>
                       </div>
                       
-                      <span className="text-[9.5px] font-semibold text-zinc-500">
+                      <span className="text-[9.5px] font-semibold text-zinc-500 tabular-nums">
                         {queueItems.length} {queueItems.length === 1 ? 'proc' : 'procs'}
                       </span>
                     </div>
 
-                    {/* Horizontal Process Chips Track */}
-                    <div className="min-h-[26px] flex items-center gap-1 overflow-x-auto custom-scrollbar p-1 rounded bg-black/60 border border-zinc-900">
-                      <AnimatePresence mode="popLayout">
-                        {queueItems.length > 0 ? (
-                          queueItems.map((proc) => (
-                            <motion.div
-                              key={proc.id}
-                              initial={{ scale: 0.8, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
-                              exit={{ scale: 0.8, opacity: 0 }}
-                              transition={{ duration: 0.15 }}
-                              className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border shadow-sm shrink-0 ${meta.chipBg}`}
-                            >
-                              <span className="font-bold">{proc.id}</span>
-                              <span className="text-[9px] opacity-75">rem:{proc.remainingTime}ms</span>
-                            </motion.div>
-                          ))
-                        ) : (
-                          <span className="text-[9.5px] text-zinc-600 italic px-1.5">
-                            Queue Empty
-                          </span>
-                        )}
-                      </AnimatePresence>
+                    {/* Horizontal Process Chips Track - Fixed height with hidden scrollbar */}
+                    <div className={`${isMultiQueue ? 'h-[32px]' : 'h-[72px]'} flex items-center gap-1.5 overflow-x-auto no-scrollbar px-1.5 rounded bg-black/60 border border-zinc-900 shrink-0`}>
+                      {queueItems.length > 0 ? (
+                        queueItems.map((proc) => (
+                          <div
+                            key={proc.id}
+                            className={`h-[22px] flex items-center gap-1 px-2 rounded text-[10px] font-medium border shadow-sm shrink-0 select-none whitespace-nowrap ${meta.chipBg}`}
+                          >
+                            <span className="font-bold">{proc.id}</span>
+                            <span className="text-[9px] opacity-75 tabular-nums">rem:{proc.remainingTime}ms</span>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-[9.5px] text-zinc-600 italic px-1">
+                          Queue Empty
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   {/* Inter-Queue Demotion / Promotion notes (for MLFQ) */}
                   {isMultiQueue && algorithm === 'MLFQ' && qIdx < 2 && (
-                    <div className="flex items-center justify-between px-1.5 text-[9px] text-zinc-500">
+                    <div className="h-[14px] flex items-center justify-between px-1.5 text-[9px] text-zinc-500 shrink-0">
                       <div className="flex items-center gap-1">
                         <ArrowDown className="w-2.5 h-2.5 text-zinc-600" />
                         <span>Timeout &rarr; Demoted to Q{qIdx + 1}</span>
@@ -289,7 +286,7 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
 
                   {/* Static rule note for MLQ */}
                   {isMultiQueue && algorithm === 'MLQ' && qIdx === 0 && (
-                    <div className="flex items-center gap-1 px-1.5 text-[9px] text-zinc-500">
+                    <div className="h-[14px] flex items-center gap-1 px-1.5 text-[9px] text-zinc-500 shrink-0">
                       <span>• Static Partition: processes remain in assigned priority queues</span>
                     </div>
                   )}
@@ -298,80 +295,89 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
             })}
           </div>
 
-          {/* Right Area: CPU Execution Core */}
+          {/* Right Area: CPU Execution Core - Locked dimensions to prevent resizing */}
           <div className={`${isMultiQueue ? 'md:col-span-4' : 'md:col-span-5'} flex flex-col justify-start`}>
-            <div className="w-full h-full min-h-[140px] flex flex-col items-center justify-center p-3 rounded-xl border border-zinc-800 bg-zinc-950/80 relative shadow-xl">
+            <div className="w-full h-full min-h-[190px] flex flex-col justify-between p-3 rounded-xl border border-zinc-800 bg-zinc-950/80 relative shadow-xl">
               
-              <div className="w-full flex items-center justify-between pb-1.5 mb-1.5 border-b border-zinc-900">
+              <div className="h-[20px] w-full flex items-center justify-between pb-1.5 mb-1 border-b border-zinc-900 shrink-0">
                 <div className="flex items-center gap-1.5">
                   <span className={`w-2 h-2 rounded-full ${activeCpu ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">CPU Core 0</span>
                 </div>
-                {activeCpu && (
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
-                    Active
-                  </span>
-                )}
+                <span className={`text-[9px] px-1.5 py-0.2 rounded border ${activeCpu ? 'bg-zinc-900 border-zinc-800 text-zinc-300 font-semibold' : 'bg-zinc-950 border-zinc-900 text-zinc-600'}`}>
+                  {activeCpu ? 'Active' : 'Idle'}
+                </span>
               </div>
 
-              {activeCpu ? (
-                <div className="flex flex-col items-center text-center my-auto">
-                  <div className="text-[9px] uppercase tracking-widest font-bold text-zinc-500 mb-1">
-                    Currently Executing
-                  </div>
-                  
-                  <motion.div 
-                    key={activeCpu.id}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="w-12 h-12 rounded-xl border border-zinc-700 bg-zinc-900 flex items-center justify-center shadow-lg my-1"
-                  >
+              {/* Center CPU Content - Perfectly symmetrical between Active & Idle */}
+              <div className="flex-1 flex flex-col items-center justify-center my-auto py-1">
+                <div className="h-[14px] text-[9px] uppercase tracking-widest font-bold text-zinc-500 mb-1 flex items-center justify-center shrink-0">
+                  {activeCpu ? 'Currently Executing' : 'System Idle'}
+                </div>
+                
+                <div 
+                  className={`w-12 h-12 rounded-xl border flex items-center justify-center shadow-lg my-1 shrink-0 ${
+                    activeCpu ? 'border-zinc-700 bg-zinc-900' : 'border-zinc-800 bg-zinc-900/60'
+                  }`}
+                >
+                  {activeCpu ? (
                     <span className="text-xl font-black text-white">{activeCpu.id}</span>
-                  </motion.div>
-
-                  <div className="mt-1 flex flex-col items-center gap-0.5">
-                    <span className="text-xs font-semibold text-zinc-200">
-                      {activeCpu.remainingTime} ms remaining
-                    </span>
-                    {isMultiQueue && (
-                      <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 mt-0.5">
-                        Dispatched from Q{activeCpu.queue}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center text-center my-auto">
-                  <div className="w-10 h-10 rounded-xl border border-zinc-800 bg-zinc-900/60 flex items-center justify-center mb-1">
+                  ) : (
                     <Cpu className="w-5 h-5 text-zinc-600" />
-                  </div>
-                  <div className="text-xs font-bold text-zinc-400">System Idle</div>
-                  <div className="text-[9px] text-zinc-600 mt-0.5">Waiting for process arrival</div>
+                  )}
                 </div>
-              )}
+
+                <div className="h-[34px] mt-1 flex flex-col items-center justify-center gap-0.5 shrink-0 text-center">
+                  {activeCpu ? (
+                    <>
+                      <span className="text-xs font-semibold text-zinc-200 tabular-nums leading-tight">
+                        {activeCpu.remainingTime} ms remaining
+                      </span>
+                      {isMultiQueue ? (
+                        <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 mt-0.5 leading-none">
+                          Dispatched from Q{activeCpu.queue}
+                        </span>
+                      ) : (
+                        <span className="text-[9px] text-zinc-500 leading-none">
+                          Unilevel CPU Dispatch
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xs font-semibold text-zinc-500 leading-tight">
+                        Waiting for process
+                      </span>
+                      <span className="text-[9px] text-zinc-600 mt-0.5 leading-none">
+                        Processor Standby
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Lower Completed Processes Tray */}
-        <div className="shrink-0 flex items-center gap-2 p-2 rounded-lg bg-zinc-900/40 border border-zinc-800/80 overflow-x-auto custom-scrollbar">
-          <div className="flex items-center gap-1.5 shrink-0 text-zinc-400 text-[10px] font-semibold pr-2 border-r border-zinc-800">
+        {/* Lower Completed Processes Tray - Fixed locked height */}
+        <div className="h-[40px] shrink-0 flex items-center gap-2 p-1.5 px-2.5 rounded-lg bg-zinc-900/40 border border-zinc-800/80 overflow-hidden">
+          <div className="flex items-center gap-1.5 shrink-0 text-zinc-400 text-[10px] font-semibold pr-2 border-r border-zinc-800 h-full">
             <CheckCircle2 className="w-3.5 h-3.5 text-zinc-400" />
             <span>Terminated ({completedList.length})</span>
           </div>
 
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex-1 flex items-center gap-1.5 min-w-0 overflow-x-auto no-scrollbar h-full py-0.5">
             {completedList.length > 0 ? (
               completedList.map(pId => (
                 <span 
                   key={pId} 
-                  className="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-800 text-zinc-200 border border-zinc-700 shrink-0"
+                  className="h-[22px] flex items-center px-2 rounded text-[10px] font-bold bg-zinc-800 text-zinc-200 border border-zinc-700 shrink-0"
                 >
                   ✓ {pId}
                 </span>
               ))
             ) : (
-              <span className="text-[10px] text-zinc-600 italic">No processes finished yet</span>
+              <span className="text-[10px] text-zinc-600 italic px-1">No processes finished yet</span>
             )}
           </div>
         </div>
