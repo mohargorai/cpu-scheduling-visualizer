@@ -1,13 +1,117 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { useStore } from '../store';
-import { Plus, Trash2, Users, Activity, Upload, Settings, Cpu, Shuffle, Target } from 'lucide-react';
+import { Plus, Trash2, Users, Activity, Upload, Settings, Cpu, Shuffle, Target, Sparkles, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProcessColor } from './GanttChart';
 
+export const PRESETS = [
+  {
+    id: 'idle-gap',
+    name: 'CPU Idle Gap Demo',
+    badge: 'Proves Util < 100%',
+    description: 'Staggered arrivals create idle gaps between jobs, proving CPU utilization drops below 100%.',
+    algorithm: 'MLFQ',
+    config: { timeQuantum: 2, quanta: [2, 4, 8], agingThreshold: 10 },
+    processes: [
+      { id: 'P1', arrivalTime: 0, burstTime: 2, priority: 1 },
+      { id: 'P2', arrivalTime: 8, burstTime: 4, priority: 1 },
+      { id: 'P3', arrivalTime: 16, burstTime: 5, priority: 1 },
+    ]
+  },
+  {
+    id: 'convoy-effect',
+    name: 'Convoy Effect Demo (FCFS)',
+    badge: 'FCFS Delay',
+    description: 'A 24ms CPU-burst job arrives first, holding the CPU and causing long wait times for small jobs.',
+    algorithm: 'FCFS',
+    config: {},
+    processes: [
+      { id: 'P1', arrivalTime: 0, burstTime: 24, priority: 1 },
+      { id: 'P2', arrivalTime: 1, burstTime: 3, priority: 1 },
+      { id: 'P3', arrivalTime: 2, burstTime: 3, priority: 1 },
+      { id: 'P4', arrivalTime: 3, burstTime: 2, priority: 1 },
+    ]
+  },
+  {
+    id: 'mlfq-aging',
+    name: 'MLFQ Demotion & Aging',
+    badge: 'Dynamic Feedback',
+    description: 'Long jobs demote through Q0→Q1→Q2, while the 10ms aging trigger promotes starving processes back to Q0.',
+    algorithm: 'MLFQ',
+    config: { timeQuantum: 2, quanta: [2, 4, 8], agingThreshold: 10 },
+    processes: [
+      { id: 'P1', arrivalTime: 0, burstTime: 18, priority: 1 },
+      { id: 'P2', arrivalTime: 0, burstTime: 2, priority: 1 },
+      { id: 'P3', arrivalTime: 2, burstTime: 4, priority: 1 },
+      { id: 'P4', arrivalTime: 6, burstTime: 16, priority: 1 },
+    ]
+  },
+  {
+    id: 'starvation-priority',
+    name: 'Starvation Demo (Priority)',
+    badge: 'Indefinite Delay',
+    description: 'A continuous stream of incoming high-priority jobs completely starves low-priority process P1.',
+    algorithm: 'Priority',
+    config: {},
+    processes: [
+      { id: 'P1', arrivalTime: 0, burstTime: 20, priority: 5 },
+      { id: 'P2', arrivalTime: 1, burstTime: 3, priority: 1 },
+      { id: 'P3', arrivalTime: 3, burstTime: 3, priority: 1 },
+      { id: 'P4', arrivalTime: 5, burstTime: 3, priority: 1 },
+      { id: 'P5', arrivalTime: 7, burstTime: 2, priority: 2 },
+    ]
+  },
+  {
+    id: 'rr-fair-share',
+    name: 'Round Robin Time-Sharing',
+    badge: 'Interactive',
+    description: 'Multiple concurrent interactive tasks execute in round-robin fashion, ensuring bounded response time.',
+    algorithm: 'RR',
+    config: { timeQuantum: 3 },
+    processes: [
+      { id: 'P1', arrivalTime: 0, burstTime: 9, priority: 1 },
+      { id: 'P2', arrivalTime: 1, burstTime: 7, priority: 1 },
+      { id: 'P3', arrivalTime: 2, burstTime: 6, priority: 1 },
+      { id: 'P4', arrivalTime: 3, burstTime: 5, priority: 1 },
+    ]
+  },
+  {
+    id: 'sjf-optimal',
+    name: 'SJF Optimal Waiting Time',
+    badge: 'Min Avg WT',
+    description: 'Prioritizing jobs with smallest burst time demonstrates provably minimal average waiting time.',
+    algorithm: 'SJF',
+    config: {},
+    processes: [
+      { id: 'P1', arrivalTime: 0, burstTime: 12, priority: 1 },
+      { id: 'P2', arrivalTime: 1, burstTime: 4, priority: 1 },
+      { id: 'P3', arrivalTime: 2, burstTime: 2, priority: 1 },
+      { id: 'P4', arrivalTime: 3, burstTime: 6, priority: 1 },
+    ]
+  }
+];
+
 export function ProcessInput() {
-  const { processes, algorithm, config, setAlgorithm, setConfig, addProcess, removeProcess, setProcesses } = useStore();
+  const { processes, algorithm, config, setAlgorithm, setConfig, addProcess, removeProcess, setProcesses, updateProcess } = useStore();
   const [newProcess, setNewProcess] = useState({ arrivalTime: 0, burstTime: 5, priority: 1 });
+  const [showPresets, setShowPresets] = useState(false);
+  const [editingCell, setEditingCell] = useState(null); // { id, field, val }
   const fileInputRef = useRef(null);
+
+  const handleSaveInline = () => {
+    if (!editingCell) return;
+    const num = Math.max(0, parseInt(editingCell.val) || 0);
+    const finalVal = editingCell.field === 'burstTime' ? Math.max(1, num) : num;
+    updateProcess(editingCell.id, { [editingCell.field]: finalVal });
+    setEditingCell(null);
+  };
+
+  const loadPreset = (preset) => {
+    setAlgorithm(preset.algorithm);
+    if (preset.config) setConfig(preset.config);
+    setProcesses(preset.processes);
+    setShowPresets(false);
+  };
 
   const generateRandomWorkload = () => {
     let procs = [];
@@ -158,8 +262,8 @@ export function ProcessInput() {
     const lastProcess = processes[processes.length - 1];
     const newIdNum = lastProcess ? (parseInt(lastProcess.id.replace('P', '')) || processes.length) + 1 : 1;
     const id = `P${newIdNum}`;
-    addProcess({ 
-      id, 
+    addProcess({
+      id,
       arrivalTime: parseInt(newProcess.arrivalTime) || 0,
       burstTime: parseInt(newProcess.burstTime) || 1,
       priority: parseInt(newProcess.priority) || 1
@@ -181,7 +285,7 @@ export function ProcessInput() {
         } else if (file.name.endsWith('.csv')) {
           const lines = text.split('\n').filter(l => l.trim() !== '');
           const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-          
+
           for (let i = 1; i < lines.length; i++) {
             const values = lines[i].split(',');
             let p = {};
@@ -214,7 +318,7 @@ export function ProcessInput() {
         <h2 className="text-sm font-semibold text-white flex items-center gap-2 mb-3">
           <Settings className="w-4 h-4 text-zinc-400" /> System Configuration
         </h2>
-        
+
         <div className="space-y-3 bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/50">
           <div>
             <div className="flex items-center justify-between mb-1.5">
@@ -233,11 +337,10 @@ export function ProcessInput() {
                     setAlgorithm('FCFS');
                   }
                 }}
-                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
-                  algorithm !== 'MLQ' && algorithm !== 'MLFQ'
+                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${algorithm !== 'MLQ' && algorithm !== 'MLFQ'
                     ? 'bg-white text-black font-bold shadow-sm'
                     : 'text-zinc-400 hover:text-white'
-                }`}
+                  }`}
               >
                 Standard Schedulers
               </button>
@@ -248,18 +351,17 @@ export function ProcessInput() {
                     setAlgorithm('MLQ');
                   }
                 }}
-                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${
-                  algorithm === 'MLQ' || algorithm === 'MLFQ'
+                className={`py-1.5 px-2 rounded-md text-xs font-semibold transition-all ${algorithm === 'MLQ' || algorithm === 'MLFQ'
                     ? 'bg-white text-black font-bold shadow-sm'
                     : 'text-zinc-400 hover:text-white'
-                }`}
+                  }`}
               >
                 Multi-Queue Engines
               </button>
             </div>
 
             <div className="relative">
-              <select 
+              <select
                 className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-white outline-none appearance-none font-medium transition-colors cursor-pointer"
                 value={algorithm}
                 onChange={(e) => setAlgorithm(e.target.value)}
@@ -281,22 +383,22 @@ export function ProcessInput() {
                 ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
               </div>
             </div>
           </div>
-          
+
           {(algorithm === 'RR' || algorithm === 'MLFQ') && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }} 
-              animate={{ opacity: 1, height: 'auto' }} 
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
             >
               <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1.5">
                 {algorithm === 'MLFQ' ? 'Top Queue Quantum (Q₀)' : 'Time Quantum'}
               </label>
-              <input 
-                type="number" min="1" 
+              <input
+                type="number" min="1"
                 className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-white outline-none font-medium transition-colors"
                 value={config.timeQuantum === '' ? '' : config.timeQuantum}
                 onChange={(e) => setConfig({ timeQuantum: e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1) })}
@@ -305,9 +407,9 @@ export function ProcessInput() {
           )}
 
           {algorithm === 'MLFQ' && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }} 
-              animate={{ opacity: 1, height: 'auto' }} 
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="text-[11px] text-zinc-400 bg-zinc-900/60 p-2.5 rounded-lg border border-zinc-800 space-y-1.5"
             >
@@ -325,9 +427,9 @@ export function ProcessInput() {
           )}
 
           {algorithm === 'MLQ' && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }} 
-              animate={{ opacity: 1, height: 'auto' }} 
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="text-[11px] text-zinc-400 bg-zinc-900/60 p-2.5 rounded-lg border border-zinc-800 space-y-1.5"
             >
@@ -354,16 +456,28 @@ export function ProcessInput() {
               {processes.length}
             </span>
           </h2>
-          {processes.length > 0 && (
-            <button 
-              onClick={() => setProcesses([])}
-              className="text-[10px] uppercase tracking-wider font-semibold text-red-500/80 hover:text-red-400 transition-colors flex items-center gap-1"
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowPresets(true)}
+              className="text-[11px] font-semibold text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 shadow-xs"
+              title="Open curated scenario presets"
             >
-              <Trash2 className="w-3 h-3" /> Clear All
+              <Sparkles className="w-3 h-3 text-sky-400" /> Presets
             </button>
-          )}
+            {processes.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setProcesses([])}
+                className="text-[10px] uppercase tracking-wider font-semibold text-red-500/80 hover:text-red-400 transition-colors flex items-center gap-1 px-1.5 py-1"
+                title="Clear all processes"
+              >
+                <Trash2 className="w-3 h-3" /> Clear All
+              </button>
+            )}
+          </div>
         </div>
-        
+
         <div className="flex-1 min-h-[120px] max-h-[220px] overflow-y-auto mb-2.5 pr-1 custom-scrollbar">
           <AnimatePresence initial={false}>
             {processes.slice(0, 50).map(p => {
@@ -378,19 +492,85 @@ export function ProcessInput() {
                     <div className="flex gap-4 text-sm">
                       <div className="flex flex-col">
                         <span className="text-zinc-500 text-[9px] font-semibold uppercase tracking-wider">Arrival</span>
-                        <span className="text-zinc-300 text-xs font-medium">{p.arrivalTime}</span>
+                        {editingCell?.id === p.id && editingCell?.field === 'arrivalTime' ? (
+                          <input
+                            type="number"
+                            min="0"
+                            autoFocus
+                            value={editingCell.val}
+                            onChange={(e) => setEditingCell({ ...editingCell, val: e.target.value })}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveInline();
+                              if (e.key === 'Escape') setEditingCell(null);
+                            }}
+                            onBlur={handleSaveInline}
+                            className="w-12 bg-black border border-sky-400 text-white text-xs font-mono rounded px-1 py-0.2 outline-none"
+                          />
+                        ) : (
+                          <span
+                            onClick={() => setEditingCell({ id: p.id, field: 'arrivalTime', val: p.arrivalTime })}
+                            className="text-zinc-300 text-xs font-medium cursor-pointer hover:text-sky-400 hover:underline transition-colors"
+                            title="Click to edit arrival time"
+                          >
+                            {p.arrivalTime}
+                          </span>
+                        )}
                       </div>
                       <div className="flex flex-col">
                         <span className="text-zinc-500 text-[9px] font-semibold uppercase tracking-wider">Burst</span>
-                        <span className="text-zinc-300 text-xs font-medium">{p.burstTime}</span>
+                        {editingCell?.id === p.id && editingCell?.field === 'burstTime' ? (
+                          <input
+                            type="number"
+                            min="1"
+                            autoFocus
+                            value={editingCell.val}
+                            onChange={(e) => setEditingCell({ ...editingCell, val: e.target.value })}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveInline();
+                              if (e.key === 'Escape') setEditingCell(null);
+                            }}
+                            onBlur={handleSaveInline}
+                            className="w-12 bg-black border border-sky-400 text-white text-xs font-mono rounded px-1 py-0.2 outline-none"
+                          />
+                        ) : (
+                          <span
+                            onClick={() => setEditingCell({ id: p.id, field: 'burstTime', val: p.burstTime })}
+                            className="text-zinc-300 text-xs font-medium cursor-pointer hover:text-sky-400 hover:underline transition-colors"
+                            title="Click to edit burst time"
+                          >
+                            {p.burstTime}
+                          </span>
+                        )}
                       </div>
                       <div className="flex flex-col">
                         <span className="text-zinc-500 text-[9px] font-semibold uppercase tracking-wider">Priority</span>
-                        <span className="text-zinc-300 text-xs font-medium">{p.priority}</span>
+                        {editingCell?.id === p.id && editingCell?.field === 'priority' ? (
+                          <input
+                            type="number"
+                            min="1"
+                            autoFocus
+                            value={editingCell.val}
+                            onChange={(e) => setEditingCell({ ...editingCell, val: e.target.value })}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveInline();
+                              if (e.key === 'Escape') setEditingCell(null);
+                            }}
+                            onBlur={handleSaveInline}
+                            className="w-12 bg-black border border-sky-400 text-white text-xs font-mono rounded px-1 py-0.2 outline-none"
+                          />
+                        ) : (
+                          <span
+                            onClick={() => setEditingCell({ id: p.id, field: 'priority', val: p.priority })}
+                            className="text-zinc-300 text-xs font-medium cursor-pointer hover:text-sky-400 hover:underline transition-colors"
+                            title="Click to edit priority"
+                          >
+                            {p.priority}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => removeProcess(p.id)}
                     className="text-zinc-600 hover:text-white p-1.5 rounded transition-colors"
                   >
@@ -408,7 +588,7 @@ export function ProcessInput() {
               }
 
               return (
-                <motion.div 
+                <motion.div
                   key={p.id}
                   initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                   animate={{ opacity: 1, height: 'auto', marginBottom: 8 }}
@@ -427,15 +607,15 @@ export function ProcessInput() {
             )}
           </AnimatePresence>
           {processes.length === 0 && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="flex flex-col items-center justify-center text-zinc-500 p-4 border border-dashed border-zinc-800 rounded-lg h-full min-h-[110px] text-center"
             >
               <Activity className="w-5 h-5 mb-1.5 opacity-40 text-zinc-400" />
               <p className="text-xs font-semibold text-zinc-300">Process Queue is Empty</p>
               <p className="text-[11px] text-zinc-500 mt-1 max-w-[210px] leading-relaxed">
-                Add processes using the form below or generate a tailored workload.
+                Add processes using the form below.
               </p>
             </motion.div>
           )}
@@ -445,41 +625,42 @@ export function ProcessInput() {
           <div className="grid grid-cols-3 gap-2.5 mb-3">
             <div>
               <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400 mb-1">Arrival</label>
-              <input type="number" min="0" value={newProcess.arrivalTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({...newProcess, arrivalTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="0" value={newProcess.arrivalTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({ ...newProcess, arrivalTime: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400 mb-1">Burst</label>
-              <input type="number" min="1" value={newProcess.burstTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({...newProcess, burstTime: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="1" value={newProcess.burstTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({ ...newProcess, burstTime: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400 mb-1">Priority</label>
-              <input type="number" min="1" value={newProcess.priority} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({...newProcess, priority: e.target.value === '' ? '' : parseInt(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="1" value={newProcess.priority} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({ ...newProcess, priority: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
           </div>
-          
+
           <div className="flex gap-2">
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={handleAdd} 
-              className="flex-1 bg-white hover:bg-zinc-200 text-black font-bold py-2 rounded transition-colors flex items-center justify-center gap-2 text-xs shadow-sm"
+              onClick={handleAdd}
+              className="flex-1 bg-white hover:bg-zinc-200 text-black font-bold py-2 rounded transition-colors flex items-center justify-center gap-1.5 text-xs shadow-sm"
             >
-              <Plus className="w-3.5 h-3.5" /> Add Process
+              <Plus className="w-3.5 h-3.5" /> Add
             </motion.button>
-            <input 
-              type="file" 
-              accept=".json,.csv" 
-              ref={fileInputRef} 
-              onChange={handleFileUpload} 
-              className="hidden" 
+            <input
+              type="file"
+              accept=".json,.csv"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              className="hidden"
             />
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => fileInputRef.current?.click()} 
-              className="flex-1 bg-zinc-850 hover:bg-zinc-800 text-zinc-200 hover:text-white font-medium py-2 rounded transition-colors flex items-center justify-center gap-2 text-xs border border-zinc-700/80"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-1 bg-zinc-850 hover:bg-zinc-800 text-zinc-200 hover:text-white font-medium py-2 rounded transition-colors flex items-center justify-center gap-1.5 text-xs border border-zinc-700/80"
+              title="Import JSON or CSV dataset"
             >
-              <Upload className="w-3.5 h-3.5 text-zinc-400" /> Import Dataset
+              <Upload className="w-3.5 h-3.5 text-zinc-400" /> Import
             </motion.button>
           </div>
         </div>
@@ -512,13 +693,12 @@ export function ProcessInput() {
               <span className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
                 Starvation Risk
               </span>
-              <span className={`text-xs font-bold ${
-                algorithmInfo.starvation.toLowerCase().includes('prevented') || algorithmInfo.starvation.toLowerCase().includes('zero') || algorithmInfo.starvation.toLowerCase().includes('none')
+              <span className={`text-xs font-bold ${algorithmInfo.starvation.toLowerCase().includes('prevented') || algorithmInfo.starvation.toLowerCase().includes('zero') || algorithmInfo.starvation.toLowerCase().includes('none')
                   ? 'text-emerald-400'
                   : algorithmInfo.starvation.toLowerCase().includes('high')
-                  ? 'text-red-400'
-                  : 'text-zinc-200'
-              }`}>
+                    ? 'text-red-400'
+                    : 'text-zinc-200'
+                }`}>
                 {algorithmInfo.starvation}
               </span>
             </div>
@@ -533,7 +713,7 @@ export function ProcessInput() {
             </p>
           </div>
 
-          <div 
+          <div
             className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 text-left group transition-colors hover:border-zinc-700 cursor-help"
             title={`Optimal Workload Target: ${algorithmInfo.target}`}
           >
@@ -564,6 +744,69 @@ export function ProcessInput() {
           </motion.button>
         </div>
       </div>
+
+      {/* Curated Presets Modal */}
+      <AnimatePresence>
+        {showPresets && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-xl p-5 shadow-2xl flex flex-col gap-4 max-h-[85vh] overflow-hidden"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Curated Scenarios & Demos</h3>
+                    <p className="text-[11px] text-zinc-400">One-click standard OS scheduling experiments</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowPresets(false)}
+                  className="p-1 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-900 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-2.5 overflow-y-auto pr-1 custom-scrollbar">
+                {PRESETS.map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => loadPreset(p)}
+                    className="p-3 rounded-lg border border-zinc-800/80 bg-zinc-900/50 hover:bg-zinc-900 hover:border-zinc-700 transition-all cursor-pointer group flex flex-col gap-1.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white group-hover:text-sky-400 transition-colors">
+                          {p.name}
+                        </span>
+                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                          {p.algorithm}
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                        {p.badge}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      {p.description}
+                    </p>
+                    <div className="text-[10px] text-zinc-500 font-mono flex items-center gap-2 pt-1 border-t border-zinc-800/60">
+                      <span>{p.processes.length} Processes:</span>
+                      <span>{p.processes.map(x => `${x.id}(BT:${x.burstTime})`).join(', ')}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

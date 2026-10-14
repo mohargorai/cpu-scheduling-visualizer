@@ -30,9 +30,17 @@
   - Preemptive Priority Scheduling
   - Multilevel Queue (MLQ - Priority Partitioned)
   - Multi-Level Feedback Queue (MLFQ - Dynamic Demotion & Aging)
-- **Live Interactive Visualization:**
-  - Real-time seamless auto-run simulation: Change any parameter (algorithm, time quantum, add/remove process) and watch all charts update instantly without manual re-triggers.
+- **Multi-Algorithm Comparison View (`#comparison`):**
+  - Side-by-side benchmarking of any two scheduling algorithms simultaneously.
+  - Performance delta badges showing percentage improvements/regressions in Average Turnaround Time, Waiting Time, CPU Utilization, and Total Makespan.
+  - Synchronized dual Gantt chart execution timelines and comparative turnaround vs. waiting time bar charts.
+- **Curated Educational Presets Modal:**
+  - Six pre-configured standard OS benchmark scenarios: CPU Idle Gap (proves CPU Utilization < 100%), Convoy Effect (FCFS), SJF Optimal Makespan, Priority Inversion & Starvation, Round Robin Fair-Share Slicing, and MLFQ Dynamic Demotion & Aging.
+- **Live Interactive Visualization & Dispatcher Decision Log:**
+  - Real-time auto-run simulation: Updates all timelines and metrics instantly on parameter or process changes.
   - Interactive Queue Visualizer with a timeline scrubber to replay process execution state at any millisecond.
+  - Real-time Dispatcher Decision Log recording dispatches, quantum expirations, queue demotions, aging promotions, idle states, and process completions with interactive click-to-scrub.
+  - Playback Keyboard Shortcuts (`Space` to Play/Pause, `←`/`→` for 1ms stepping, `Home`/`End` for bounds, `R` to Reset).
   - Dynamic playback speed controls (0.5x to 500x) with O(log N) binary search for ultra-fast scrubbing.
   - Anti-jitter fixed queue architecture (`h-[62px]`, `.no-scrollbar`) eliminating layout resizing during live playback.
 - **Dedicated Process Dashboard:**
@@ -40,19 +48,22 @@
   - Interactive multi-column sorting and instant search filtering by Process ID.
   - One-click export to **CSV** and **JSON** for academic lab reports and experimental benchmarking.
   - Comparative Turnaround vs. Waiting vs. Response Time distribution chart.
+- **High-Resolution 2x Retina PNG Report Exporter:**
+  - Zero external dependency HTML5 canvas generator creating executive-ready summary report sheets with algorithm metadata, KPI summary cards, and individual process metrics.
+- **Inline Process Queue Editing:**
+  - In-place editing of Arrival, Burst, and Priority directly inside the Process Queue list with Enter/blur autosave.
 - **Algorithm-Tailored Workload Engine:**
-  - Single-click generator providing pedagogically calibrated 10-process workloads specifically tailored to expose each algorithm's mechanics (e.g., Convoy Effect in FCFS, quantum slicing in RR, preemption in SRTF, multi-tier partitioning in MLQ, demotion and aging in MLFQ).
-- **Comparative Analytics Dashboard:**
-  - Automated calculation of Average Waiting Time, Turnaround Time, Response Time, Total Makespan, System Throughput, and CPU Utilization.
-  - Individual Process Metrics visualized via responsive, paginated Bar Charts.
+  - Single-click generator providing pedagogically calibrated 10-process workloads specifically tailored to expose each algorithm's mechanics.
+- **Realistic CPU Utilization Computation:**
+  - Real-world CPU Utilization formula accurately accounting for idle arrival gaps: $\frac{\text{Makespan} - \text{Total Idle}}{\text{Makespan}} \times 100\%$.
 - **Mass-Scale Workload Handling:**
   - Import external datasets directly via `.csv` or `.json`.
   - Capable of running perfectly smooth simulations with 1,500+ concurrent processes.
   - O(1) ID tracking and consolidated trace intervals preventing browser UI thread blocking.
 - **Premium UI/UX:**
-  - "Full Black" high-contrast dark mode tailored for technical presentations.
-  - Symmetrical dual-column layout with synchronized bottom alignment.
-  - Independent horizontal scroll containers for wide tables ensuring 100% responsiveness on mobile (375px+), tablet, and desktop viewports.
+  - Pure Black (`#000000`) high-contrast dark theme with curated minimal solid accent colors.
+  - Three top-level navigation views: Visualizer, Process Dashboard, and Algorithm Comparison.
+  - 100% responsive across mobile (375px+), tablet, and desktop viewports.
 
 ## 🛠️ Technology Stack
 
@@ -80,10 +91,12 @@ npm run dev
 
 ### 3. Usage
 1. Open your browser and navigate to `http://localhost:5173`.
-2. Add incoming processes manually, load an **Algorithm-Tailored Workload**, or import a `.csv` / `.json` file.
+2. Add incoming processes manually, click **Presets** to load standard educational scenarios (CPU Idle Gap, Convoy Effect, SJF, Starvation, MLFQ Demotion), or import a `.csv` / `.json` file.
 3. Select your desired Scheduling Algorithm from the dropdown (configure the Time Quantum if using RR, MLQ, or MLFQ).
-4. Click **Run Simulation** (or enjoy instant auto-run updates) to inspect the Gantt Chart and live Queue Visualizer.
+4. Click **Run Simulation** (or enjoy instant auto-run updates) to inspect the Gantt Chart, live Queue Visualizer, and Dispatcher Decision Log.
 5. Click **Process Dashboard** in the header to view per-process telemetry, filter/sort metrics, and export data to CSV/JSON.
+6. Click **Compare** in the header to run side-by-side comparative benchmarks between any two algorithms with performance delta indicators.
+7. Click **Export PNG** in the header to generate a presentation-ready high-resolution summary report sheet.
 
 ## 🎓 Academic Concepts Covered
 - **Convoy Effect** (Demonstrated in FCFS with long-burst processes blocking short jobs)

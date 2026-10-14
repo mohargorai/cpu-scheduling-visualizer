@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Play, Pause, SkipBack, SkipForward, StepBack, StepForward, 
-  Cpu, ArrowDown, ArrowUp, CheckCircle2, Activity
+  Cpu, ArrowDown, ArrowUp, CheckCircle2, Activity, ScrollText, X
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getProcessColor } from './GanttChart';
 
 export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS', simulationResult = null }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
+  const [showDecisionLog, setShowDecisionLog] = useState(false);
+  const [logFilter, setLogFilter] = useState('all');
   const maxTime = trace.length > 0 ? trace[trace.length - 1].endTime : 0;
 
   const isMultiQueue = algorithm === 'MLQ' || algorithm === 'MLFQ';
@@ -37,6 +39,39 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
 
     return () => clearInterval(interval);
   }, [isPlaying, maxTime, speedMultiplier]);
+
+  // Global Keyboard Shortcuts for Playback
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsPlaying(p => !p);
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        setIsPlaying(false);
+        setCurrentTime(t => Math.min(maxTime, t + 1));
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        setIsPlaying(false);
+        setCurrentTime(t => Math.max(0, t - 1));
+      } else if (e.code === 'Home') {
+        e.preventDefault();
+        setIsPlaying(false);
+        setCurrentTime(0);
+      } else if (e.code === 'End') {
+        e.preventDefault();
+        setIsPlaying(false);
+        setCurrentTime(maxTime);
+      } else if (e.code === 'KeyR') {
+        e.preventDefault();
+        setIsPlaying(false);
+        setCurrentTime(0);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [maxTime]);
 
   // Reset time when algorithm or trace changes
   useEffect(() => {
@@ -205,8 +240,79 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
     }
   ];
 
+  // Extract chronological Dispatcher Decision Logs from simulation events
+  const decisionLogs = useMemo(() => {
+    if (!simulationResult || !simulationResult.trace || simulationResult.trace.length === 0) return [];
+    const logs = [];
+
+    if (simulationResult.queueSnapshots && simulationResult.queueSnapshots.length > 0) {
+      let lastEvent = '';
+      for (const snap of simulationResult.queueSnapshots) {
+        if (snap.event && snap.event !== lastEvent) {
+          let type = 'dispatch';
+          const lower = snap.event.toLowerCase();
+          if (lower.includes('idle')) type = 'idle';
+          else if (lower.includes('demot')) type = 'demotion';
+          else if (lower.includes('aging') || lower.includes('promot')) type = 'aging';
+          else if (lower.includes('preempt')) type = 'preemption';
+          else if (lower.includes('completed') || lower.includes('finish') || lower.includes('terminat')) type = 'completion';
+
+          logs.push({
+            time: snap.time,
+            event: snap.event,
+            type
+          });
+          lastEvent = snap.event;
+        }
+      }
+      if (logs.length > 0) return logs;
+    }
+
+    // Fallback: construct from trace
+    for (let i = 0; i < simulationResult.trace.length; i++) {
+      const t = simulationResult.trace[i];
+      if (t.processId === 'IDLE') {
+        logs.push({
+          time: t.startTime,
+          event: `Ready queue empty → CPU is IDLE (${t.endTime - t.startTime}ms)`,
+          type: 'idle'
+        });
+      } else {
+        const isFirst = i === 0 || simulationResult.trace[i - 1].processId !== t.processId;
+        if (isFirst) {
+          const qText = t.queue !== undefined ? ` from Queue ${t.queue}` : '';
+          logs.push({
+            time: t.startTime,
+            event: `Dispatched ${t.processId}${qText} (${t.endTime - t.startTime}ms slice)`,
+            type: 'dispatch'
+          });
+        }
+      }
+    }
+
+    if (simulationResult.metrics) {
+      for (const m of simulationResult.metrics) {
+        if (m.completionTime !== undefined) {
+          logs.push({
+            time: m.completionTime,
+            event: `Process ${m.id} completed execution → Terminated`,
+            type: 'completion'
+          });
+        }
+      }
+    }
+
+    logs.sort((a, b) => a.time - b.time);
+    return logs;
+  }, [simulationResult]);
+
+  const filteredLogs = useMemo(() => {
+    if (logFilter === 'all') return decisionLogs;
+    return decisionLogs.filter(l => l.type === logFilter);
+  }, [decisionLogs, logFilter]);
+
   return (
-    <div className="flex flex-col h-full justify-between select-none gap-3">
+    <div className="flex flex-col h-full justify-between select-none gap-3 relative">
       
       <div className="flex flex-col gap-2.5">
         {/* Top Status & Activity Strip */}
@@ -218,6 +324,20 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
             </span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
+            {decisionLogs.length > 0 && (
+              <button
+                onClick={() => setShowDecisionLog(v => !v)}
+                className={`px-2 py-0.5 rounded text-[10px] font-semibold border transition-all flex items-center gap-1 ${
+                  showDecisionLog 
+                    ? 'bg-sky-500/20 text-sky-300 border-sky-500/30' 
+                    : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:text-white hover:bg-zinc-700'
+                }`}
+                title="Toggle Live Dispatcher Decision Log"
+              >
+                <ScrollText className="w-3 h-3 text-sky-400" />
+                <span>Log ({decisionLogs.length})</span>
+              </button>
+            )}
             <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700">
               {isMultiQueue ? `${algorithm} Engine` : `${algorithm} Unilevel`}
             </span>
@@ -505,7 +625,100 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
             {speedMultiplier}x
           </motion.button>
         </div>
+
+        {/* Keyboard shortcut hint */}
+        <div className="text-[9px] text-zinc-500 text-center mt-2 flex flex-wrap items-center justify-center gap-2">
+          <span><kbd className="px-1 py-0.2 bg-zinc-950 border border-zinc-800 rounded text-zinc-400 font-mono">Space</kbd> Play/Pause</span>
+          <span><kbd className="px-1 py-0.2 bg-zinc-950 border border-zinc-800 rounded text-zinc-400 font-mono">← / →</kbd> Step 1ms</span>
+          <span><kbd className="px-1 py-0.2 bg-zinc-950 border border-zinc-800 rounded text-zinc-400 font-mono">Home/End</kbd> Bounds</span>
+          <span><kbd className="px-1 py-0.2 bg-zinc-950 border border-zinc-800 rounded text-zinc-400 font-mono">R</kbd> Reset</span>
+        </div>
       </div>
+
+      {/* Dispatcher Decision Log Drawer */}
+      <AnimatePresence>
+        {showDecisionLog && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute inset-x-0 bottom-[95px] top-[40px] z-20 bg-zinc-950/95 border border-zinc-800 rounded-xl p-3 backdrop-blur-md shadow-2xl flex flex-col gap-2.5 overflow-hidden"
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+              <div className="flex items-center gap-2">
+                <ScrollText className="w-4 h-4 text-sky-400" />
+                <h4 className="text-xs font-bold text-white">Dispatcher Decision Log</h4>
+                <span className="text-[10px] text-zinc-400 font-mono">({filteredLogs.length} events)</span>
+              </div>
+              <button 
+                onClick={() => setShowDecisionLog(false)}
+                className="p-1 text-zinc-400 hover:text-white rounded hover:bg-zinc-900 transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Filter pills */}
+            <div className="flex items-center gap-1 text-[10px] overflow-x-auto no-scrollbar pb-1">
+              {[
+                { id: 'all', label: 'All' },
+                { id: 'demotion', label: 'Demotions' },
+                { id: 'aging', label: 'Aging' },
+                { id: 'preemption', label: 'Preemptions' },
+                { id: 'idle', label: 'Idle' },
+                { id: 'completion', label: 'Completed' },
+              ].map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setLogFilter(f.id)}
+                  className={`px-2 py-0.5 rounded font-semibold transition-colors shrink-0 ${
+                    logFilter === f.id ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Scrollable event list */}
+            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar text-xs">
+              {filteredLogs.map((log, idx) => {
+                const isCurrent = Math.abs(currentTime - log.time) <= 1;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => { setCurrentTime(log.time); setIsPlaying(false); }}
+                    className={`p-2 rounded-lg border transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                      isCurrent 
+                        ? 'bg-zinc-900 border-sky-500/50 shadow-sm' 
+                        : 'bg-zinc-900/40 border-zinc-800/80 hover:bg-zinc-900 hover:border-zinc-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="text-[10px] font-mono font-bold text-sky-400 bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded shrink-0">
+                        T={log.time}ms
+                      </span>
+                      <span className={`text-[11px] truncate ${isCurrent ? 'text-white font-medium' : 'text-zinc-300'}`}>
+                        {log.event}
+                      </span>
+                    </div>
+                    <span className={`text-[9px] uppercase font-bold px-1.5 py-0.2 rounded border shrink-0 ${
+                      log.type === 'aging' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                      log.type === 'demotion' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                      log.type === 'preemption' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
+                      log.type === 'idle' ? 'bg-zinc-800 text-zinc-400 border-zinc-700' :
+                      log.type === 'completion' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                      'bg-sky-500/10 text-sky-400 border-sky-500/20'
+                    }`}>
+                      {log.type}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

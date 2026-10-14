@@ -80,13 +80,8 @@ export function GanttChart({ trace }) {
 
   if (!trace || trace.length === 0) return <div className="text-zinc-600 h-full flex items-center justify-center font-medium">No trace available</div>;
 
-  const barSize = useMemo(() => {
-    const count = displayData.length || 1;
-    if (count <= 4) return 24;
-    if (count <= 7) return 22;
-    if (count <= 11) return 18;
-    return 15;
-  }, [displayData.length]);
+  const count = displayData.length || 1;
+  const barSize = count <= 4 ? 24 : count <= 7 ? 22 : count <= 11 ? 18 : 15;
 
   return (
     <div className="w-full h-full bg-zinc-900/30 rounded-lg border border-zinc-800/50 flex flex-col justify-between overflow-hidden">

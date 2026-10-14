@@ -6,20 +6,26 @@ import { MetricsPanel } from './components/MetricsPanel';
 import { ProcessInput } from './components/ProcessInput';
 import { QueueVisualizer } from './components/QueueVisualizer';
 import { ProcessDashboard } from './components/ProcessDashboard';
-import { Play, Loader2, Cpu, Layers, LayoutGrid, TableProperties } from 'lucide-react';
+import { AlgorithmComparison } from './components/AlgorithmComparison';
+import { Play, Loader2, Layers, LayoutGrid, TableProperties, Scale, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { exportSimulationReport } from './utils/reportExporter';
 
 function App() {
   const { processes, algorithm, config, setSimulationResult, simulationResult } = useStore();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
-    return window.location.hash === '#dashboard' ? 'dashboard' : 'visualizer';
+    if (window.location.hash === '#dashboard') return 'dashboard';
+    if (window.location.hash === '#comparison') return 'comparison';
+    return 'visualizer';
   });
 
   useEffect(() => {
     const handleHashChange = () => {
       if (window.location.hash === '#dashboard') {
         setActiveTab('dashboard');
+      } else if (window.location.hash === '#comparison') {
+        setActiveTab('comparison');
       } else {
         setActiveTab('visualizer');
       }
@@ -32,6 +38,8 @@ function App() {
     setActiveTab(tab);
     if (tab === 'dashboard') {
       window.location.hash = 'dashboard';
+    } else if (tab === 'comparison') {
+      window.location.hash = 'comparison';
     } else {
       history.pushState('', document.title, window.location.pathname + window.location.search);
     }
@@ -101,8 +109,8 @@ function App() {
           </div>
         </div>
 
-        {/* View Switcher: Visualizer vs Process Analytics Dashboard */}
-        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/90 rounded-lg border border-zinc-800">
+        {/* View Switcher: Visualizer vs Process Analytics Dashboard vs Algorithm Comparison */}
+        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-zinc-900/90 rounded-lg border border-zinc-800">
           <button
             onClick={() => switchTab('visualizer')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
@@ -133,23 +141,61 @@ function App() {
               </span>
             )}
           </button>
+
+          <button
+            onClick={() => switchTab('comparison')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              activeTab === 'comparison'
+                ? 'bg-white text-black font-bold shadow-sm'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Scale className="w-3.5 h-3.5" />
+            <span>Compare</span>
+          </button>
         </div>
 
-        <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={runSimulation}
-          disabled={loading || processes.length === 0}
-          className="w-full md:w-auto flex items-center justify-center gap-2 bg-white hover:bg-zinc-200 text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 shadow-sm"
-        >
-          {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
-          <span className="text-sm">{loading ? 'Simulating...' : 'Run Simulation'}</span>
-        </motion.button>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          {simulationResult && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => exportSimulationReport({ algorithm, processes, simulationResult })}
+              className="flex items-center justify-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-800 font-semibold py-2 px-3.5 rounded-lg text-xs transition-colors shadow-sm"
+              title="Export high-resolution PNG summary report"
+            >
+              <Download className="w-3.5 h-3.5 text-zinc-400" />
+              <span className="hidden sm:inline">Export PNG</span>
+            </motion.button>
+          )}
+
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={runSimulation}
+            disabled={loading || processes.length === 0}
+            className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-white hover:bg-zinc-200 text-black font-bold py-2 px-5 rounded-lg transition-all disabled:opacity-50 shadow-sm"
+          >
+            {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
+            <span className="text-xs">{loading ? 'Simulating...' : 'Run Simulation'}</span>
+          </motion.button>
+        </div>
       </motion.header>
 
       {/* Main Content Area */}
       <AnimatePresence mode="wait">
-        {activeTab === 'dashboard' ? (
+        {activeTab === 'comparison' ? (
+          <motion.div
+            key="comparison"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+            className="flex-1 w-full"
+          >
+            <AlgorithmComparison />
+          </motion.div>
+        ) : activeTab === 'dashboard' ? (
           <motion.div
             key="dashboard"
             initial={{ opacity: 0, y: 15 }}

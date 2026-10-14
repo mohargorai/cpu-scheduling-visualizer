@@ -8,7 +8,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { getProcessColor } from './GanttChart';
 
 export function ProcessDashboard({ onRunSimulation, loading }) {
-  const { processes, algorithm, config, simulationResult } = useStore();
+  const { processes, algorithm, simulationResult } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('id');
   const [sortDirection, setSortDirection] = useState('asc'); // 'asc' | 'desc'
