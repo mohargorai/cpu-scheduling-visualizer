@@ -92,8 +92,8 @@ function App() {
         className="flex-none flex flex-col md:flex-row items-center justify-between gap-4 mb-5 p-4 px-6 bg-zinc-950 rounded-xl border border-zinc-900 shadow-lg"
       >
         <div className="flex items-center gap-4 w-full md:w-auto justify-start">
-          <div className="p-2.5 bg-zinc-900 rounded-lg border border-zinc-800 hidden sm:block">
-            <Cpu className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 p-1 bg-zinc-900 rounded-lg border border-zinc-800 hidden sm:flex items-center justify-center shadow-inner">
+            <img src="/favicon.svg" alt="CPU Scheduling Logo" className="w-7 h-7" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-white tracking-tight leading-tight">CPU Scheduling & MLFQ Visualizer</h1>
@@ -107,7 +107,7 @@ function App() {
             onClick={() => switchTab('visualizer')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
               activeTab === 'visualizer'
-                ? 'bg-white text-black font-bold shadow-sm'
+                ? 'bg-sky-500 text-white font-bold shadow-xs'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -119,7 +119,7 @@ function App() {
             onClick={() => switchTab('dashboard')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
               activeTab === 'dashboard'
-                ? 'bg-white text-black font-bold shadow-sm'
+                ? 'bg-sky-500 text-white font-bold shadow-xs'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -127,7 +127,7 @@ function App() {
             <span>Process Dashboard</span>
             {processes.length > 0 && (
               <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
-                activeTab === 'dashboard' ? 'bg-zinc-200 text-black' : 'bg-zinc-800 text-zinc-300'
+                activeTab === 'dashboard' ? 'bg-sky-600 text-white' : 'bg-zinc-800 text-zinc-300'
               }`}>
                 {processes.length}
               </span>
@@ -140,7 +140,7 @@ function App() {
           whileTap={{ scale: 0.98 }}
           onClick={runSimulation}
           disabled={loading || processes.length === 0}
-          className="w-full md:w-auto flex items-center justify-center gap-2 bg-white text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 hover:bg-zinc-200 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+          className="w-full md:w-auto flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(16,185,129,0.25)]"
         >
           {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
           <span className="text-sm">{loading ? 'Simulating...' : 'Run Simulation'}</span>
@@ -219,7 +219,7 @@ function App() {
                         </h2>
                         <button
                           onClick={() => switchTab('dashboard')}
-                          className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 group"
+                          className="text-[11px] font-semibold text-sky-400 hover:text-sky-300 transition-colors flex items-center gap-1 group"
                         >
                           <span>Open Full Process Dashboard</span>
                           <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>

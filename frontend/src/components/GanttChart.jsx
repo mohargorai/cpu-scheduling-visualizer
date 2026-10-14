@@ -2,22 +2,34 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const colors = ['#e4e4e7', '#a1a1aa', '#71717a', '#52525b', '#3f3f46', '#27272a'];
+export const processColors = [
+  '#38bdf8', // P1: Sky Blue
+  '#a855f7', // P2: Purple
+  '#34d399', // P3: Emerald
+  '#fbbf24', // P4: Amber
+  '#f43f5e', // P5: Rose
+  '#818cf8', // P6: Indigo
+  '#2dd4bf', // P7: Teal
+  '#fb923c', // P8: Orange
+  '#e879f9', // P9: Fuchsia
+  '#60a5fa', // P10: Blue
+];
 
-const getColor = (processId) => {
-  if (processId === 'IDLE') return '#18181b';
-  const num = parseInt(processId.replace('P', '')) || 0;
-  return colors[num % colors.length];
+export const getProcessColor = (processId) => {
+  if (!processId || processId === 'IDLE') return '#27272a';
+  const num = parseInt(String(processId).replace(/\D/g, '')) || 1;
+  return processColors[(num - 1) % processColors.length];
 };
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const d = payload[0].payload;
+    const color = getProcessColor(d.name);
     return (
       <div className="bg-zinc-950 border border-zinc-800 p-3 rounded-lg shadow-xl text-sm min-w-[140px]">
         <div className="flex items-center gap-2 mb-2 pb-2 border-b border-zinc-900">
-          <div className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: getColor(d.name)}}></div>
-          <p className="font-semibold text-white">{d.name === 'IDLE' ? 'CPU Idle' : `Process ${d.name}`}</p>
+          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{backgroundColor: color}}></div>
+          <p className="font-bold" style={{color: d.name === 'IDLE' ? '#a1a1aa' : color}}>{d.name === 'IDLE' ? 'CPU Idle' : `Process ${d.name}`}</p>
         </div>
         <div className="space-y-1 text-zinc-400 text-xs">
           <p className="flex justify-between"><span>Start:</span> <span className="text-zinc-200">{d.start} ms</span></p>
@@ -94,7 +106,7 @@ export function GanttChart({ trace }) {
               <Tooltip content={<CustomTooltip />} cursor={{fill: '#18181b', opacity: 0.5}} />
               <Bar dataKey="duration" radius={[2, 2, 2, 2]} barSize={barSize} isAnimationActive={false}>
                 {displayData.map((entry, index) => (
-                  <Cell key={`cell-${page}-${index}`} fill={getColor(entry.name)} />
+                  <Cell key={`cell-${page}-${index}`} fill={getProcessColor(entry.name)} />
                 ))}
               </Bar>
             </BarChart>

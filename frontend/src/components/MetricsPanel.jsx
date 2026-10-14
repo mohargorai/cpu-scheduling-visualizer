@@ -25,50 +25,50 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
     <div className="flex flex-col h-full gap-3">
       {/* Full Final Results Executive Cards */}
       <div className="flex-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Waiting Time</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-amber-500/20 shadow-sm">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">Average Waiting Time</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-white tracking-tight">
+            <p className="text-xl font-bold text-amber-400 tracking-tight">
               <CountUp value={avg.avgWT || 0} decimals={2} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
           </div>
         </div>
         
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Turnaround Time</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-sky-500/20 shadow-sm">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">Average Turnaround Time</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-white tracking-tight">
+            <p className="text-xl font-bold text-sky-400 tracking-tight">
               <CountUp value={avg.avgTAT || 0} decimals={2} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
           </div>
         </div>
         
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">CPU Utilization</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-emerald-500/20 shadow-sm">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">CPU Utilization</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-white tracking-tight">
+            <p className="text-xl font-bold text-emerald-400 tracking-tight">
               <CountUp value={avg.cpuUtilization || 0} decimals={2} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">%</p>
           </div>
         </div>
 
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Total Makespan</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-purple-500/20 shadow-sm">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">Total Makespan</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-white tracking-tight">
+            <p className="text-xl font-bold text-purple-400 tracking-tight">
               <CountUp value={maxEndTime} decimals={0} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
           </div>
         </div>
 
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800 col-span-2 sm:col-span-1">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">System Throughput</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-cyan-500/20 shadow-sm col-span-2 sm:col-span-1">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">System Throughput</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-white tracking-tight">{throughput}</p>
+            <p className="text-xl font-bold text-cyan-400 tracking-tight">{throughput}</p>
             <p className="text-zinc-500 font-medium text-[10px]">p/ms</p>
           </div>
         </div>
@@ -76,7 +76,17 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
 
       <div className="flex-1 bg-zinc-900/50 p-3 rounded-lg border border-zinc-800 flex flex-col min-h-0 relative">
         <div className="flex-none flex justify-between items-center mb-2 px-2">
-          <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Individual Process Metrics</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Individual Process Metrics</h3>
+            <div className="hidden sm:flex items-center gap-2.5 text-[10px]">
+              <span className="flex items-center gap-1 text-zinc-400">
+                <span className="w-2 h-2 rounded-xs bg-sky-400 inline-block"></span> Turnaround
+              </span>
+              <span className="flex items-center gap-1 text-zinc-400">
+                <span className="w-2 h-2 rounded-xs bg-amber-400 inline-block"></span> Waiting
+              </span>
+            </div>
+          </div>
           {totalPages > 1 && (
             <div className="flex items-center gap-3">
               <button 
@@ -106,8 +116,8 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
                 contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', fontSize: '12px' }}
                 itemStyle={{ fontWeight: '500', color: '#fafafa' }}
               />
-              <Bar dataKey="waitingTime" name="Waiting Time" fill="#d4d4d8" radius={[2, 2, 0, 0]} barSize={20} isAnimationActive={false} />
-              <Bar dataKey="turnaroundTime" name="Turnaround Time" fill="#52525b" radius={[2, 2, 0, 0]} barSize={20} isAnimationActive={false} />
+              <Bar dataKey="turnaroundTime" name="Turnaround Time" fill="#38bdf8" radius={[2, 2, 0, 0]} barSize={16} isAnimationActive={false} />
+              <Bar dataKey="waitingTime" name="Waiting Time" fill="#fbbf24" radius={[2, 2, 0, 0]} barSize={16} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>

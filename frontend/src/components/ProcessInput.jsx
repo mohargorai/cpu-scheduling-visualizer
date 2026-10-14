@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo } from 'react';
 import { useStore } from '../store';
 import { Plus, Trash2, Users, Activity, Upload, Settings, Cpu, Shuffle, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getProcessColor } from './GanttChart';
 
 export function ProcessInput() {
   const { processes, algorithm, config, setAlgorithm, setConfig, addProcess, removeProcess, setProcesses } = useStore();
@@ -370,8 +371,11 @@ export function ProcessInput() {
               const content = (
                 <>
                   <div className="flex items-center gap-3">
-                    <div className="bg-zinc-950 w-9 h-9 rounded flex items-center justify-center border border-zinc-800">
-                      <span className="font-bold text-white text-xs">{p.id}</span>
+                    <div 
+                      className="w-9 h-9 rounded flex items-center justify-center border bg-zinc-950 shadow-xs"
+                      style={{ borderColor: `${getProcessColor(p.id)}50` }}
+                    >
+                      <span className="font-bold text-xs" style={{ color: getProcessColor(p.id) }}>{p.id}</span>
                     </div>
                     <div className="flex gap-4 text-sm">
                       <div className="flex flex-col">
@@ -466,7 +470,7 @@ export function ProcessInput() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleAdd} 
-              className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2 rounded transition-colors flex items-center justify-center gap-2 text-xs"
+              className="flex-1 bg-sky-500 hover:bg-sky-400 text-white font-bold py-2 rounded transition-colors flex items-center justify-center gap-2 text-xs shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" /> Add Process
             </motion.button>
@@ -481,9 +485,9 @@ export function ProcessInput() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => fileInputRef.current?.click()} 
-              className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2 rounded transition-colors flex items-center justify-center gap-2 text-xs"
+              className="flex-1 bg-zinc-850 hover:bg-zinc-800 text-zinc-200 hover:text-white font-medium py-2 rounded transition-colors flex items-center justify-center gap-2 text-xs border border-zinc-700/80"
             >
-              <Upload className="w-3.5 h-3.5" /> Import Dataset
+              <Upload className="w-3.5 h-3.5 text-zinc-400" /> Import Dataset
             </motion.button>
           </div>
         </div>
@@ -492,12 +496,12 @@ export function ProcessInput() {
         <div className="flex-none bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 flex flex-col gap-3 shadow-sm">
           <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800">
             <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-white" />
+              <Cpu className="w-4 h-4 text-sky-400" />
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">
                 Algorithm Mechanics & Rules
               </h3>
             </div>
-            <span className="text-xs font-bold px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700">
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30">
               {algorithm}
             </span>
           </div>
@@ -507,7 +511,11 @@ export function ProcessInput() {
               <span className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
                 Preemption Mode
               </span>
-              <span className="text-xs font-bold text-white">
+              <span className={`text-xs font-bold ${
+                algorithmInfo.mode.includes('Preemptive') && !algorithmInfo.mode.startsWith('Non') 
+                  ? 'text-amber-400' 
+                  : 'text-sky-400'
+              }`}>
                 {algorithmInfo.mode}
               </span>
             </div>
@@ -516,7 +524,13 @@ export function ProcessInput() {
               <span className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
                 Starvation Risk
               </span>
-              <span className="text-xs font-bold text-white">
+              <span className={`text-xs font-bold ${
+                algorithmInfo.starvation.toLowerCase().includes('high') 
+                  ? 'text-rose-400' 
+                  : algorithmInfo.starvation.toLowerCase().includes('possible')
+                  ? 'text-amber-400'
+                  : 'text-emerald-400'
+              }`}>
                 {algorithmInfo.starvation}
               </span>
             </div>
@@ -537,7 +551,7 @@ export function ProcessInput() {
           >
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Target className="w-3 h-3 text-zinc-400" />
+                <Target className="w-3 h-3 text-sky-400" />
                 Optimal Workload Target
               </span>
               <span className="text-[9px] font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">
@@ -554,10 +568,10 @@ export function ProcessInput() {
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={generateRandomWorkload}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white transition-all border border-zinc-700 shadow-sm"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-sky-300 hover:text-white transition-all border border-sky-500/30 shadow-xs"
             title={`Generate 10 random processes tailored for ${algorithm === 'PreemptivePriority' ? 'Preemptive Priority' : algorithm}`}
           >
-            <Shuffle className="w-3.5 h-3.5 text-zinc-300" />
+            <Shuffle className="w-3.5 h-3.5 text-sky-400" />
             <span>Generate 10 Workload ({algorithm === 'PreemptivePriority' ? 'Priority (P)' : algorithm})</span>
           </motion.button>
         </div>
