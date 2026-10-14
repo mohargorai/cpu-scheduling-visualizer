@@ -61,7 +61,7 @@ function simulateRR(processes, timeQuantum) {
             let p = readyQueue.shift();
             
             if (lastProcessId !== p.id) {
-                if (lastProcessId !== null && lastProcessId !== 'IDLE') {
+                if (lastProcessId !== null) {
                     trace.push({
                         processId: lastProcessId,
                         startTime: burstStart,

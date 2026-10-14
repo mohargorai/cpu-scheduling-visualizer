@@ -62,17 +62,28 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
 
   // Compute or extract exact queue states at currentTime
   const currentSnapshot = useMemo(() => {
-    // 1. If backend provided queueSnapshots, check for matching timestamp
+    // 1. If backend provided queueSnapshots, check for matching timestamp within covered range
     if (simulationResult?.queueSnapshots && simulationResult.queueSnapshots.length > 0) {
-      const snap = simulationResult.queueSnapshots.find(s => s.time === currentTime);
-      if (snap) return snap;
-      // If exact time tick not found, pick the closest preceding snapshot
-      let closest = simulationResult.queueSnapshots[0];
-      for (const s of simulationResult.queueSnapshots) {
-        if (s.time <= currentTime) closest = s;
-        else break;
+      const lastSnap = simulationResult.queueSnapshots[simulationResult.queueSnapshots.length - 1];
+      if (currentTime <= lastSnap.time) {
+        // Fast binary search
+        let left = 0;
+        let right = simulationResult.queueSnapshots.length - 1;
+        let closest = simulationResult.queueSnapshots[0];
+        while (left <= right) {
+          const mid = Math.floor((left + right) / 2);
+          const s = simulationResult.queueSnapshots[mid];
+          if (s.time === currentTime) return s;
+          if (s.time < currentTime) {
+            closest = s;
+            left = mid + 1;
+          } else {
+            right = mid - 1;
+          }
+        }
+        return closest;
       }
-      return closest;
+      // If currentTime exceeds backend snapshots (e.g. large workloads), fall through to deterministic client reconstructor
     }
 
     // 2. High-precision deterministic client reconstructor
@@ -89,17 +100,16 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
       };
     }
 
-    // Accumulate execution from trace
+    // Accumulate execution from trace (trace is chronological, so break early when startTime >= currentTime)
     for (const t of trace) {
       if (t.processId === 'IDLE') continue;
-      if (t.startTime < currentTime) {
-        const executedInSlice = Math.min(currentTime, t.endTime) - t.startTime;
-        if (procStats[t.processId]) {
-          procStats[t.processId].executedTime += executedInSlice;
-          procStats[t.processId].remainingTime = Math.max(0, procStats[t.processId].burstTime - procStats[t.processId].executedTime);
-          if (t.queue !== undefined) {
-            procStats[t.processId].lastQueue = t.queue;
-          }
+      if (t.startTime >= currentTime) break;
+      const executedInSlice = Math.min(currentTime, t.endTime) - t.startTime;
+      if (procStats[t.processId]) {
+        procStats[t.processId].executedTime += executedInSlice;
+        procStats[t.processId].remainingTime = Math.max(0, procStats[t.processId].burstTime - procStats[t.processId].executedTime);
+        if (t.queue !== undefined) {
+          procStats[t.processId].lastQueue = t.queue;
         }
       }
     }
@@ -158,40 +168,40 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
   const completedList = currentSnapshot?.completed || [];
   const activeEvent = currentSnapshot?.event || 'Ready to simulate';
 
-  // Semantic solid color metadata for queues
+  // Clean monochrome metadata with subtle queue badges
   const queueMeta = isMultiQueue ? [
     { 
       name: 'Queue 0 (Q₀)', 
-      nameColor: 'text-sky-400',
+      nameColor: 'text-white',
       priorityLabel: 'High Priority', 
       quantumLabel: 'RR q=2', 
-      border: 'border-sky-500/30 bg-zinc-950/80', 
-      badgeBg: 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+      border: 'border-zinc-800 bg-zinc-900/50', 
+      badgeBg: 'bg-sky-500/10 text-sky-400 border-sky-500/20'
     },
     { 
       name: 'Queue 1 (Q₁)', 
-      nameColor: 'text-purple-400',
+      nameColor: 'text-white',
       priorityLabel: 'Medium Priority', 
       quantumLabel: 'RR q=4', 
-      border: 'border-purple-500/30 bg-zinc-950/80', 
-      badgeBg: 'bg-purple-500/10 text-purple-300 border-purple-500/30'
+      border: 'border-zinc-800 bg-zinc-900/50', 
+      badgeBg: 'bg-purple-500/10 text-purple-400 border-purple-500/20'
     },
     { 
       name: 'Queue 2 (Q₂)', 
-      nameColor: 'text-emerald-400',
+      nameColor: 'text-white',
       priorityLabel: 'Low Priority / Batch', 
       quantumLabel: algorithm === 'MLQ' ? 'FCFS' : 'RR q=8', 
-      border: 'border-emerald-500/30 bg-zinc-950/80', 
-      badgeBg: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+      border: 'border-zinc-800 bg-zinc-900/50', 
+      badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
     }
   ] : [
     { 
       name: 'Ready Queue', 
-      nameColor: 'text-sky-400',
+      nameColor: 'text-white',
       priorityLabel: 'Standard FIFO Ready Track', 
       quantumLabel: algorithm === 'RR' ? `RR q=${simulationResult?.config?.timeQuantum || 2}` : algorithm, 
-      border: 'border-sky-500/30 bg-zinc-950/80', 
-      badgeBg: 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+      border: 'border-zinc-800 bg-zinc-900/50', 
+      badgeBg: 'bg-sky-500/10 text-sky-400 border-sky-500/20'
     }
   ];
 
@@ -202,13 +212,13 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
         {/* Top Status & Activity Strip */}
         <div className="shrink-0 flex items-center justify-between gap-2 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg text-xs">
           <div className="flex items-center gap-2 truncate">
-            <Activity className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+            <Activity className={`w-3.5 h-3.5 shrink-0 ${activeCpu ? 'text-sky-400' : 'text-zinc-500'}`} />
             <span className="font-medium text-zinc-300 truncate text-[11px]">
               {activeEvent}
             </span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/30">
+            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700">
               {isMultiQueue ? `${algorithm} Engine` : `${algorithm} Unilevel`}
             </span>
           </div>
@@ -229,7 +239,7 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
                   <div 
                     className={`${isMultiQueue ? 'h-[62px]' : 'h-[110px]'} p-1.5 rounded-lg border transition-colors flex flex-col justify-between shrink-0 ${
                       isCpuSource 
-                        ? 'border-white/40 bg-zinc-900/90 shadow-[0_0_10px_rgba(255,255,255,0.05)]' 
+                        ? 'border-zinc-600 bg-zinc-900 shadow-sm' 
                         : `${meta.border}`
                     }`}
                   >
@@ -252,20 +262,25 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
                     {/* Horizontal Process Chips Track - Fixed height with hidden scrollbar */}
                     <div className={`${isMultiQueue ? 'h-[32px]' : 'h-[72px]'} flex items-center gap-1.5 overflow-x-auto no-scrollbar px-1.5 rounded bg-black/60 border border-zinc-900 shrink-0`}>
                       {queueItems.length > 0 ? (
-                        queueItems.map((proc) => {
-                          const pColor = getProcessColor(proc.id);
-                          return (
-                            <div
-                              key={proc.id}
-                              className="h-[22px] flex items-center gap-1 px-2 rounded text-[10px] font-medium border shadow-sm shrink-0 select-none whitespace-nowrap bg-zinc-900"
-                              style={{ borderColor: `${pColor}50` }}
-                            >
-                              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: pColor }} />
-                              <span className="font-bold text-white">{proc.id}</span>
-                              <span className="text-[9px] text-zinc-400 tabular-nums">rem:{proc.remainingTime}ms</span>
-                            </div>
-                          );
-                        })
+                        <>
+                          {queueItems.slice(0, 50).map((proc) => {
+                            return (
+                              <div
+                                key={proc.id}
+                                className="h-[22px] flex items-center gap-1.5 px-2 rounded text-[10px] font-medium border border-zinc-800 bg-zinc-900 text-zinc-200 shadow-xs shrink-0 select-none whitespace-nowrap"
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: getProcessColor(proc.id) }} />
+                                <span className="font-bold text-white">{proc.id}</span>
+                                <span className="text-[9px] text-zinc-400 tabular-nums">rem:{proc.remainingTime}ms</span>
+                              </div>
+                            );
+                          })}
+                          {queueItems.length > 50 && (
+                            <span className="text-[9.5px] font-semibold text-zinc-400 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 shrink-0 select-none">
+                              +{queueItems.length - 50} more
+                            </span>
+                          )}
+                        </>
                       ) : (
                         <span className="text-[9.5px] text-zinc-600 italic px-1">
                           Queue Empty
@@ -307,12 +322,12 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
               
               <div className="h-[20px] w-full flex items-center justify-between pb-1.5 mb-1 border-b border-zinc-900 shrink-0">
                 <div className="flex items-center gap-1.5">
-                  <span className={`w-2 h-2 rounded-full ${activeCpu ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-700'}`} />
+                  <span className={`w-2 h-2 rounded-full ${activeCpu ? 'bg-emerald-500' : 'bg-zinc-700'}`} />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-300">CPU Core 0</span>
                 </div>
                 <span className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${
                   activeCpu 
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
                     : 'bg-zinc-950 border-zinc-900 text-zinc-600'
                 }`}>
                   {activeCpu ? 'Active' : 'Idle'}
@@ -326,13 +341,13 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
                 </div>
                 
                 <div 
-                  className={`w-12 h-12 rounded-xl border flex items-center justify-center shadow-lg my-1 shrink-0 ${
+                  className={`w-12 h-12 rounded-xl border flex items-center justify-center shadow-lg my-1 shrink-0 transition-colors ${
                     activeCpu ? 'bg-zinc-900' : 'border-zinc-800 bg-zinc-900/60'
                   }`}
                   style={activeCpu ? { borderColor: getProcessColor(activeCpu.id) } : {}}
                 >
                   {activeCpu ? (
-                    <span className="text-xl font-black" style={{ color: getProcessColor(activeCpu.id) }}>{activeCpu.id}</span>
+                    <span className="text-xl font-black text-white">{activeCpu.id}</span>
                   ) : (
                     <Cpu className="w-5 h-5 text-zinc-600" />
                   )}
@@ -345,17 +360,11 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
                         {activeCpu.remainingTime} ms remaining
                       </span>
                       {isMultiQueue ? (
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold border mt-0.5 leading-none ${
-                          activeCpu.queue === 0 
-                            ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' 
-                            : activeCpu.queue === 1 
-                            ? 'bg-purple-500/10 border-purple-500/30 text-purple-300' 
-                            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                        }`}>
+                        <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 mt-0.5 leading-none">
                           Dispatched from Q{activeCpu.queue}
                         </span>
                       ) : (
-                        <span className="text-[9px] text-zinc-400 leading-none">
+                        <span className="text-[9px] text-zinc-500 leading-none">
                           Unilevel CPU Dispatch
                         </span>
                       )}
@@ -385,18 +394,21 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
 
           <div className="flex-1 flex items-center gap-1.5 min-w-0 overflow-x-auto no-scrollbar h-full py-0.5">
             {completedList.length > 0 ? (
-              completedList.map(pId => {
-                const pColor = getProcessColor(pId);
-                return (
+              <>
+                {completedList.length > 40 && (
+                  <span className="text-[9.5px] font-semibold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded shrink-0 select-none">
+                    +{completedList.length - 40} earlier
+                  </span>
+                )}
+                {completedList.slice(-40).map(pId => (
                   <span 
                     key={pId} 
-                    className="h-[22px] flex items-center gap-1 px-2 rounded text-[10px] font-bold bg-zinc-900/90 border shrink-0"
-                    style={{ borderColor: `${pColor}40`, color: pColor }}
+                    className="h-[22px] flex items-center px-2 rounded text-[10px] font-bold bg-zinc-800 text-zinc-200 border border-zinc-700 shrink-0"
                   >
-                    <span className="text-emerald-400">✓</span> {pId}
+                    ✓ {pId}
                   </span>
-                );
-              })
+                ))}
+              </>
             ) : (
               <span className="text-[10px] text-zinc-600 italic px-1">No processes finished yet</span>
             )}
@@ -409,7 +421,7 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
       <div className="shrink-0 bg-zinc-900/60 p-2.5 rounded-lg border border-zinc-800">
         <div className="flex justify-between items-center mb-1.5">
           <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">T = 0 ms</span>
-          <span className="bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider border border-sky-500/30 shadow-sm">
+          <span className="bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider border border-sky-500/20 shadow-sm">
             TIME = {currentTime} ms
           </span>
           <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">T = {maxTime} ms</span>
@@ -450,7 +462,7 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsPlaying(!isPlaying)} 
-            className="bg-sky-500 hover:bg-sky-400 text-white p-2 rounded-full shadow-lg transition-colors"
+            className="bg-white hover:bg-zinc-200 text-black p-2 rounded-full shadow-lg"
             title={isPlaying ? "Pause Simulation" : "Play Simulation"}
             aria-label={isPlaying ? "Pause playback" : "Play playback"}
           >

@@ -25,8 +25,8 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
     <div className="flex flex-col h-full gap-3">
       {/* Full Final Results Executive Cards */}
       <div className="flex-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-amber-500/20 shadow-sm">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">Average Waiting Time</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Waiting Time</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-amber-400 tracking-tight">
               <CountUp value={avg.avgWT || 0} decimals={2} />
@@ -35,8 +35,8 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
           </div>
         </div>
         
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-sky-500/20 shadow-sm">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">Average Turnaround Time</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Turnaround Time</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-sky-400 tracking-tight">
               <CountUp value={avg.avgTAT || 0} decimals={2} />
@@ -45,8 +45,8 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
           </div>
         </div>
         
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-emerald-500/20 shadow-sm">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">CPU Utilization</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">CPU Utilization</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-emerald-400 tracking-tight">
               <CountUp value={avg.cpuUtilization || 0} decimals={2} />
@@ -55,20 +55,20 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
           </div>
         </div>
 
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-purple-500/20 shadow-sm">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">Total Makespan</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Total Makespan</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-purple-400 tracking-tight">
+            <p className="text-xl font-bold text-white tracking-tight">
               <CountUp value={maxEndTime} decimals={0} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
           </div>
         </div>
 
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-cyan-500/20 shadow-sm col-span-2 sm:col-span-1">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 mb-0.5">System Throughput</p>
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800 col-span-2 sm:col-span-1">
+          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">System Throughput</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-cyan-400 tracking-tight">{throughput}</p>
+            <p className="text-xl font-bold text-purple-400 tracking-tight">{throughput}</p>
             <p className="text-zinc-500 font-medium text-[10px]">p/ms</p>
           </div>
         </div>

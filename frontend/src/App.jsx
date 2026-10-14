@@ -107,7 +107,7 @@ function App() {
             onClick={() => switchTab('visualizer')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
               activeTab === 'visualizer'
-                ? 'bg-sky-500 text-white font-bold shadow-xs'
+                ? 'bg-white text-black font-bold shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -119,7 +119,7 @@ function App() {
             onClick={() => switchTab('dashboard')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
               activeTab === 'dashboard'
-                ? 'bg-sky-500 text-white font-bold shadow-xs'
+                ? 'bg-white text-black font-bold shadow-sm'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
@@ -127,7 +127,7 @@ function App() {
             <span>Process Dashboard</span>
             {processes.length > 0 && (
               <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
-                activeTab === 'dashboard' ? 'bg-sky-600 text-white' : 'bg-zinc-800 text-zinc-300'
+                activeTab === 'dashboard' ? 'bg-zinc-200 text-black' : 'bg-zinc-800 text-zinc-300'
               }`}>
                 {processes.length}
               </span>
@@ -140,7 +140,7 @@ function App() {
           whileTap={{ scale: 0.98 }}
           onClick={runSimulation}
           disabled={loading || processes.length === 0}
-          className="w-full md:w-auto flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(16,185,129,0.25)]"
+          className="w-full md:w-auto flex items-center justify-center gap-2 bg-white hover:bg-zinc-200 text-black font-bold py-2.5 px-6 rounded-lg transition-all disabled:opacity-50 shadow-sm"
         >
           {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
           <span className="text-sm">{loading ? 'Simulating...' : 'Run Simulation'}</span>

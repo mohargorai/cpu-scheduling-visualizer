@@ -225,50 +225,50 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
           </div>
         </div>
 
-        <div className="bg-zinc-950 p-3.5 rounded-xl border border-amber-500/20 flex flex-col justify-between shadow-sm">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-400">Average Waiting Time</span>
+        <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Average Waiting Time</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-amber-400 tracking-tight">{stats.avgWT}</span>
             <span className="text-[10px] text-zinc-500">ms</span>
           </div>
         </div>
 
-        <div className="bg-zinc-950 p-3.5 rounded-xl border border-sky-500/20 flex flex-col justify-between shadow-sm">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-400">Average Turnaround Time</span>
+        <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Average Turnaround Time</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-sky-400 tracking-tight">{stats.avgTAT}</span>
             <span className="text-[10px] text-zinc-500">ms</span>
           </div>
         </div>
 
-        <div className="bg-zinc-950 p-3.5 rounded-xl border border-emerald-500/20 flex flex-col justify-between shadow-sm">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-400">Average Response Time</span>
+        <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Average Response Time</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-emerald-400 tracking-tight">{stats.avgRT}</span>
             <span className="text-[10px] text-zinc-500">ms</span>
           </div>
         </div>
 
-        <div className="bg-zinc-950 p-3.5 rounded-xl border border-emerald-500/20 flex flex-col justify-between shadow-sm">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-400">CPU Utilization</span>
+        <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">CPU Utilization</span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl font-bold text-emerald-400 tracking-tight">{stats.cpuUtil}</span>
             <span className="text-[10px] text-zinc-500">%</span>
           </div>
         </div>
 
-        <div className="bg-zinc-950 p-3.5 rounded-xl border border-purple-500/20 flex flex-col justify-between shadow-sm">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-400">Total Makespan (Time)</span>
+        <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Total Makespan (Time)</span>
           <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-xl font-bold text-purple-400 tracking-tight">{stats.maxEndTime}</span>
+            <span className="text-xl font-bold text-white tracking-tight">{stats.maxEndTime}</span>
             <span className="text-[10px] text-zinc-500">ms</span>
           </div>
         </div>
 
-        <div className="bg-zinc-950 p-3.5 rounded-xl border border-cyan-500/20 flex flex-col justify-between col-span-2 sm:col-span-1 shadow-sm">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-400">System Throughput</span>
+        <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between col-span-2 sm:col-span-1">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">System Throughput</span>
           <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-xl font-bold text-cyan-400 tracking-tight">{stats.throughput}</span>
+            <span className="text-xl font-bold text-purple-400 tracking-tight">{stats.throughput}</span>
             <span className="text-[10px] text-zinc-500">p/ms</span>
           </div>
         </div>
@@ -327,19 +327,19 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
                 </button>
                 <button
                   onClick={() => { setSelectedQueueFilter('0'); setCurrentPage(1); }}
-                  className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${selectedQueueFilter === '0' ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40' : 'text-zinc-400 hover:text-sky-300'}`}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${selectedQueueFilter === '0' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'}`}
                 >
                   Q₀
                 </button>
                 <button
                   onClick={() => { setSelectedQueueFilter('1'); setCurrentPage(1); }}
-                  className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${selectedQueueFilter === '1' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40' : 'text-zinc-400 hover:text-purple-300'}`}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${selectedQueueFilter === '1' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'}`}
                 >
                   Q₁
                 </button>
                 <button
                   onClick={() => { setSelectedQueueFilter('2'); setCurrentPage(1); }}
-                  className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${selectedQueueFilter === '2' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-zinc-400 hover:text-emerald-300'}`}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${selectedQueueFilter === '2' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'}`}
                 >
                   Q₂
                 </button>
@@ -469,12 +469,9 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
                     className="hover:bg-zinc-900/40 transition-colors group"
                   >
                     <td className="py-2.5 px-3">
-                      <span 
-                        className="font-bold bg-zinc-900 border px-2 py-0.5 rounded text-[11px] inline-flex items-center gap-1.5 shadow-xs"
-                        style={{ borderColor: `${getProcessColor(row.id)}50`, color: getProcessColor(row.id) }}
-                      >
+                      <span className="inline-flex items-center gap-1.5 font-bold text-white bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded text-[11px]">
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: getProcessColor(row.id) }} />
-                        {row.id}
+                        <span>{row.id}</span>
                       </span>
                     </td>
                     <td className="py-2.5 px-3 text-zinc-300 font-mono">{row.arrivalTime} ms</td>
@@ -486,13 +483,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
                     </td>
                     {isMultiQueue && (
                       <td className="py-2.5 px-3">
-                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold border ${
-                          row.queue === 0 
-                            ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' 
-                            : row.queue === 1 
-                            ? 'bg-purple-500/10 border-purple-500/30 text-purple-300' 
-                            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                        }`}>
+                        <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-zinc-800 border border-zinc-700 text-zinc-200">
                           Q{row.queue}
                         </span>
                       </td>
@@ -509,7 +500,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
                     <td className="py-2.5 px-3 font-mono text-emerald-400">
                       {row.responseTime !== null ? `${row.responseTime} ms` : '-'}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-zinc-400">
+                    <td className="py-2.5 px-3 font-mono text-zinc-500">
                       {row.slices > 1 ? `${row.slices - 1} context switches` : '0 (continuous)'}
                     </td>
                     <td className="py-2.5 px-3">
@@ -518,7 +509,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
                           <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Terminated
                         </span>
                       ) : (
-                        <span className="text-zinc-500 text-[10px] italic">Ready</span>
+                        <span className="text-zinc-600 text-[10px] italic">Ready</span>
                       )}
                     </td>
                   </tr>

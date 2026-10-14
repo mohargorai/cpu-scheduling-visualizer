@@ -315,9 +315,9 @@ export function ProcessInput() {
                 <span>MLFQ Dynamic Feedback Architecture:</span>
                 <span className="text-[9px] text-zinc-400 font-normal">3 Dynamic Queues</span>
               </div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₀</span>: Top Priority Entry Queue (RR q={config.quanta?.[0] || 2})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₁</span>: Intermediate Priority Queue (RR q={config.quanta?.[1] || 4})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₂</span>: Background Batch Queue (RR q={config.quanta?.[2] || 8})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-bold text-sky-400">Q₀</span>: Top Priority Entry Queue (RR q={config.quanta?.[0] || 2})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-bold text-purple-400">Q₁</span>: Intermediate Priority Queue (RR q={config.quanta?.[1] || 4})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-bold text-emerald-400">Q₂</span>: Background Batch Queue (RR q={config.quanta?.[2] || 8})</div>
               <div className="text-[9px] text-zinc-500 pt-1 border-t border-zinc-800">
                 Processes demote on quantum expiry; promoted to Q₀ upon aging (10ms wait).
               </div>
@@ -335,9 +335,9 @@ export function ProcessInput() {
                 <span>MLQ Priority Partition Architecture:</span>
                 <span className="text-[9px] text-zinc-400 font-normal">3 Fixed Queues</span>
               </div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₀</span> (Priority ≤ 1): Real-Time / System (RR q={config.quanta?.[0] || 2})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₁</span> (Priority = 2): Interactive (RR q={config.quanta?.[1] || 4})</div>
-              <div className="text-[10px] text-zinc-300">• <span className="font-semibold text-white">Q₂</span> (Priority ≥ 3): Batch (FCFS)</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-bold text-sky-400">Q₀</span> (Priority ≤ 1): Real-Time / System (RR q={config.quanta?.[0] || 2})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-bold text-purple-400">Q₁</span> (Priority = 2): Interactive (RR q={config.quanta?.[1] || 4})</div>
+              <div className="text-[10px] text-zinc-300">• <span className="font-bold text-emerald-400">Q₂</span> (Priority ≥ 3): Batch (FCFS)</div>
               <div className="text-[9px] text-zinc-500 pt-1 border-t border-zinc-800">
                 Fixed-priority preemption; processes remain strictly in assigned partitions.
               </div>
@@ -371,11 +371,9 @@ export function ProcessInput() {
               const content = (
                 <>
                   <div className="flex items-center gap-3">
-                    <div 
-                      className="w-9 h-9 rounded flex items-center justify-center border bg-zinc-950 shadow-xs"
-                      style={{ borderColor: `${getProcessColor(p.id)}50` }}
-                    >
-                      <span className="font-bold text-xs" style={{ color: getProcessColor(p.id) }}>{p.id}</span>
+                    <div className="bg-zinc-950 w-9 h-9 rounded flex items-center justify-center border border-zinc-800 relative">
+                      <span className="w-1.5 h-1.5 rounded-full absolute top-1 right-1" style={{ backgroundColor: getProcessColor(p.id) }} />
+                      <span className="font-bold text-white text-xs">{p.id}</span>
                     </div>
                     <div className="flex gap-4 text-sm">
                       <div className="flex flex-col">
@@ -435,16 +433,10 @@ export function ProcessInput() {
               className="flex flex-col items-center justify-center text-zinc-500 p-4 border border-dashed border-zinc-800 rounded-lg h-full min-h-[110px] text-center"
             >
               <Activity className="w-5 h-5 mb-1.5 opacity-40 text-zinc-400" />
-              <p className="text-xs font-medium text-zinc-400 mb-2">Process Queue is Empty</p>
-              <button
-                type="button"
-                onClick={generateRandomWorkload}
-                className="px-2.5 py-1 text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded border border-zinc-700 flex items-center gap-1.5 transition-colors shadow-sm"
-                title={`Generate 10 processes tailored for ${algorithm}`}
-              >
-                <Shuffle className="w-3 h-3 text-zinc-400" />
-                <span>Load 10 Sample Processes</span>
-              </button>
+              <p className="text-xs font-semibold text-zinc-300">Process Queue is Empty</p>
+              <p className="text-[11px] text-zinc-500 mt-1 max-w-[210px] leading-relaxed">
+                Add processes using the form below or generate a tailored workload.
+              </p>
             </motion.div>
           )}
         </div>
@@ -470,7 +462,7 @@ export function ProcessInput() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleAdd} 
-              className="flex-1 bg-sky-500 hover:bg-sky-400 text-white font-bold py-2 rounded transition-colors flex items-center justify-center gap-2 text-xs shadow-xs"
+              className="flex-1 bg-white hover:bg-zinc-200 text-black font-bold py-2 rounded transition-colors flex items-center justify-center gap-2 text-xs shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" /> Add Process
             </motion.button>
@@ -496,12 +488,12 @@ export function ProcessInput() {
         <div className="flex-none bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 flex flex-col gap-3 shadow-sm">
           <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800">
             <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-sky-400" />
+              <Cpu className="w-4 h-4 text-white" />
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">
                 Algorithm Mechanics & Rules
               </h3>
             </div>
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30">
+            <span className="text-xs font-bold px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700">
               {algorithm}
             </span>
           </div>
@@ -511,11 +503,7 @@ export function ProcessInput() {
               <span className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
                 Preemption Mode
               </span>
-              <span className={`text-xs font-bold ${
-                algorithmInfo.mode.includes('Preemptive') && !algorithmInfo.mode.startsWith('Non') 
-                  ? 'text-amber-400' 
-                  : 'text-sky-400'
-              }`}>
+              <span className="text-xs font-bold text-white">
                 {algorithmInfo.mode}
               </span>
             </div>
@@ -525,11 +513,11 @@ export function ProcessInput() {
                 Starvation Risk
               </span>
               <span className={`text-xs font-bold ${
-                algorithmInfo.starvation.toLowerCase().includes('high') 
-                  ? 'text-rose-400' 
-                  : algorithmInfo.starvation.toLowerCase().includes('possible')
-                  ? 'text-amber-400'
-                  : 'text-emerald-400'
+                algorithmInfo.starvation.toLowerCase().includes('prevented') || algorithmInfo.starvation.toLowerCase().includes('zero') || algorithmInfo.starvation.toLowerCase().includes('none')
+                  ? 'text-emerald-400'
+                  : algorithmInfo.starvation.toLowerCase().includes('high')
+                  ? 'text-red-400'
+                  : 'text-zinc-200'
               }`}>
                 {algorithmInfo.starvation}
               </span>
@@ -551,7 +539,7 @@ export function ProcessInput() {
           >
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Target className="w-3 h-3 text-sky-400" />
+                <Target className="w-3 h-3 text-zinc-400" />
                 Optimal Workload Target
               </span>
               <span className="text-[9px] font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors">
@@ -568,10 +556,10 @@ export function ProcessInput() {
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={generateRandomWorkload}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-sky-300 hover:text-white transition-all border border-sky-500/30 shadow-xs"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold bg-zinc-850 hover:bg-zinc-800 text-zinc-200 hover:text-white transition-all border border-zinc-700 shadow-sm"
             title={`Generate 10 random processes tailored for ${algorithm === 'PreemptivePriority' ? 'Preemptive Priority' : algorithm}`}
           >
-            <Shuffle className="w-3.5 h-3.5 text-sky-400" />
+            <Shuffle className="w-3.5 h-3.5 text-zinc-400" />
             <span>Generate 10 Workload ({algorithm === 'PreemptivePriority' ? 'Priority (P)' : algorithm})</span>
           </motion.button>
         </div>

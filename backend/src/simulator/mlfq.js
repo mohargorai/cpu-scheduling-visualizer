@@ -102,7 +102,7 @@ function simulateMLFQ(processes, quanta = [2, 4, 8], agingThreshold = 10) {
             let currentQuantum = quanta[selectedQueueLevel];
             
             if (lastProcessId !== p.id || currentQueueLevel !== selectedQueueLevel) {
-                if (lastProcessId !== null && lastProcessId !== 'IDLE') {
+                if (lastProcessId !== null) {
                     trace.push({
                         processId: lastProcessId,
                         startTime: burstStart,

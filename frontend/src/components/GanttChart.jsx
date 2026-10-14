@@ -3,16 +3,14 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const processColors = [
-  '#38bdf8', // P1: Sky Blue
-  '#a855f7', // P2: Purple
-  '#34d399', // P3: Emerald
-  '#fbbf24', // P4: Amber
-  '#f43f5e', // P5: Rose
-  '#818cf8', // P6: Indigo
-  '#2dd4bf', // P7: Teal
-  '#fb923c', // P8: Orange
-  '#e879f9', // P9: Fuchsia
-  '#60a5fa', // P10: Blue
+  '#38bdf8', // Sky 400
+  '#34d399', // Emerald 400
+  '#fbbf24', // Amber 400
+  '#a78bfa', // Purple 400
+  '#f87171', // Coral 400
+  '#2dd4bf', // Teal 400
+  '#fb923c', // Orange 400
+  '#818cf8', // Indigo 400
 ];
 
 export const getProcessColor = (processId) => {
@@ -29,7 +27,7 @@ const CustomTooltip = ({ active, payload }) => {
       <div className="bg-zinc-950 border border-zinc-800 p-3 rounded-lg shadow-xl text-sm min-w-[140px]">
         <div className="flex items-center gap-2 mb-2 pb-2 border-b border-zinc-900">
           <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{backgroundColor: color}}></div>
-          <p className="font-bold" style={{color: d.name === 'IDLE' ? '#a1a1aa' : color}}>{d.name === 'IDLE' ? 'CPU Idle' : `Process ${d.name}`}</p>
+          <p className="font-semibold text-white">{d.name === 'IDLE' ? 'CPU Idle' : `Process ${d.name}`}</p>
         </div>
         <div className="space-y-1 text-zinc-400 text-xs">
           <p className="flex justify-between"><span>Start:</span> <span className="text-zinc-200">{d.start} ms</span></p>

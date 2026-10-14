@@ -121,7 +121,7 @@ function simulateMLQ(processes, quanta = [2, 4]) {
             let executeLimit = Math.min(p.remainingTime, maxQuantum - p.timeInCurrentQuantum);
 
             if (lastProcessId !== p.id || currentQueueLevel !== selectedQueueLevel) {
-                if (lastProcessId !== null && lastProcessId !== 'IDLE') {
+                if (lastProcessId !== null) {
                     trace.push({
                         processId: lastProcessId,
                         startTime: burstStart,
