@@ -42,21 +42,21 @@ The application follows a decoupled client-server architecture:
 |  | Express Router + DoS & Sanitization Middleware (Max 1,500 procs per batch)|  |
 |  +-------------------------------------+-------------------------------------+  |
 |                                        |                                        |
-|         +------------------------------+------------------------------+         |
-|         |                              |                              |         |
-|         v                              v                              v         |
-|  +---------------------+      +---------------------+      +---------------------+  |
-|  | Single-Queue Engine |      | Multilevel Queue MLQ|      | Multi-Level Feedback|  |
-|  | - FCFS, SJF, SRTF   |      | - Static Partition  |      |   Queue (MLFQ)      |  |
-|  | - Round Robin (RR)  |      | - Fixed Preemption  |      | - Dynamic Demotion  |  |
-|  | - Priority Sched    |      | - Q0/Q1(RR), Q2(FCFS|      | - Starvation Aging  |  |
-|  +---------------------+      +---------------------+      +---------------------+  |
-|         |                              |                              |         |
-|         +------------------------------+------------------------------+         |
+|              +-------------------------+-------------------------+              |
+|              |                         |                         |              |
+|              v                         v                         v              |
+|   +---------------------+   +---------------------+   +---------------------+   |
+|   | Single-Queue Engine |   | Multilevel Queue MLQ|   | Multi-Level Feedback|   |
+|   | - FCFS, SJF, SRTF   |   | - Static Partition  |   |   Queue (MLFQ)      |   |
+|   | - Round Robin (RR)  |   | - Fixed Preemption  |   | - Dynamic Demotion  |   |
+|   | - Priority Sched    |   | - Q0/Q1(RR), Q2(FCFS|   | - Starvation Aging  |   |
+|   +---------------------+   +---------------------+   +---------------------+   |
+|              |                         |                         |              |
+|              +-------------------------+-------------------------+              |
 |                                        v                                        |
-|                 +-------------------------------------------------------------+  |
-|                 | Pure In-Memory Discrete Event Simulation (Zero DB Overhead) |  |
-|                 +-------------------------------------------------------------+  |
+|         +-------------------------------------------------------------+         |
+|         | Pure In-Memory Discrete Event Simulation (Zero DB Overhead) |         |
+|         +-------------------------------------------------------------+         |
 +---------------------------------------------------------------------------------+
 ```
 
