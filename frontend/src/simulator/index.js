@@ -1,10 +1,10 @@
 // frontend/src/simulator/index.js
-import { simulateFCFS } from './fcfs';
-import { simulateSJF } from './sjf';
-import { simulateRR } from './rr';
-import { simulatePriority } from './priority';
-import { simulateMLQ } from './mlq';
-import { simulateMLFQ } from './mlfq';
+import { simulateFCFS } from './fcfs.js';
+import { simulateSJF } from './sjf.js';
+import { simulateRR } from './rr.js';
+import { simulatePriority } from './priority.js';
+import { simulateMLQ } from './mlq.js';
+import { simulateMLFQ } from './mlfq.js';
 
 export function runSimulationEngine({ algorithm, processes, config }) {
     if (!Array.isArray(processes) || processes.length === 0) {
@@ -31,6 +31,7 @@ export function runSimulationEngine({ algorithm, processes, config }) {
         case 'Priority': 
             return simulatePriority(sanitizedProcesses, false);
         case 'PreemptivePriority': 
+        case 'Preemptive Priority':
             return simulatePriority(sanitizedProcesses, true);
         case 'MLFQ': 
             return simulateMLFQ(sanitizedProcesses, config?.quanta || [2, 4, 8], config?.agingThreshold || 10);
