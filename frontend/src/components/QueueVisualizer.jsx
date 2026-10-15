@@ -451,9 +451,9 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
             <div className="w-full h-full min-h-[190px] flex flex-col justify-between p-3 rounded-xl border border-zinc-800 bg-zinc-950/80 relative shadow-xl">
               
               <div className="h-[20px] w-full flex items-center justify-between pb-1.5 mb-1 border-b border-zinc-900 shrink-0">
-                <div className="flex items-center gap-1.5">
-                  <span className={`w-2 h-2 rounded-full ${activeCpu ? 'bg-emerald-500' : 'bg-zinc-700'}`} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-300">CPU Core 0</span>
+                <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${activeCpu ? 'bg-emerald-500' : 'bg-zinc-700'}`} />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-300 whitespace-nowrap">CPU Core 0</span>
                 </div>
                 <span className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${
                   activeCpu 
