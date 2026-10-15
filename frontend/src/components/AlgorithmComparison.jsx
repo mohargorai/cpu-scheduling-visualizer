@@ -112,6 +112,28 @@ export function AlgorithmComparison() {
     return { text: `↑ +${diff} ms slower`, color: 'red' };
   };
 
+  const formatCSDelta = (valA = 0, valB = 0) => {
+    const diff = valB - valA;
+    if (diff === 0) return { text: 'Equal switches', color: 'zinc' };
+    if (diff < 0) return { text: `↓ ${Math.abs(diff)} fewer switches`, color: 'emerald' };
+    return { text: `↑ +${diff} more switches`, color: 'red' };
+  };
+
+  const getContextSwitches = (trace) => {
+    if (!trace || trace.length <= 1) return 0;
+    let count = 0;
+    let lastProc = null;
+    for (const slice of trace) {
+      if (slice.processId && slice.processId !== 'IDLE') {
+        if (lastProc !== null && lastProc !== slice.processId) {
+          count++;
+        }
+        lastProc = slice.processId;
+      }
+    }
+    return count;
+  };
+
   const tatDelta = formatLatencyDelta(avgA.avgTAT, avgB.avgTAT);
   const wtDelta = formatLatencyDelta(avgA.avgWT, avgB.avgWT);
   const utilDelta = formatUtilDelta(avgA.cpuUtilization, avgB.cpuUtilization);
@@ -119,6 +141,10 @@ export function AlgorithmComparison() {
   const makespanA = resultA?.trace?.length > 0 ? resultA.trace[resultA.trace.length - 1].endTime : 0;
   const makespanB = resultB?.trace?.length > 0 ? resultB.trace[resultB.trace.length - 1].endTime : 0;
   const makespanDelta = formatMakespanDelta(makespanA, makespanB);
+
+  const csA = getContextSwitches(resultA?.trace);
+  const csB = getContextSwitches(resultB?.trace);
+  const csDelta = formatCSDelta(csA, csB);
 
   // Educational executive verdict
   const getEducationalVerdict = () => {
@@ -256,7 +282,7 @@ export function AlgorithmComparison() {
       )}
 
       {/* Side-by-Side Dual Performance Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         {/* Average Turnaround Time */}
         <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between shadow-lg">
           <div className="flex items-center justify-between pb-2 border-b border-zinc-900/80">
@@ -387,6 +413,39 @@ export function AlgorithmComparison() {
           </div>
 
           <span className="text-[9px] text-zinc-500">Total completion time for all processes</span>
+        </div>
+
+        {/* Context Switches */}
+        <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-900 flex flex-col justify-between shadow-lg">
+          <div className="flex items-center justify-between pb-2 border-b border-zinc-900/80">
+            <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Context Switches</span>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+              csDelta.color === 'emerald'
+                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25'
+                : csDelta.color === 'red'
+                ? 'bg-red-500/10 text-red-400 border-red-500/25'
+                : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+            }`}>
+              {csDelta.text}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 my-2.5 items-center">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] text-zinc-500 font-semibold truncate" title={algoA}>A: {algoA}</span>
+              <span className="text-sm sm:text-base font-bold text-zinc-300">
+                {csA} <span className="text-[10px] text-zinc-500 font-normal">switches</span>
+              </span>
+            </div>
+            <div className="flex flex-col min-w-0 border-l border-zinc-800/80 pl-2.5 sm:pl-3">
+              <span className="text-[10px] text-orange-400 font-semibold truncate" title={algoB}>B: {algoB}</span>
+              <span className="text-base sm:text-lg font-black text-orange-400">
+                {csB} <span className="text-[10px] text-orange-500/70 font-normal">switches</span>
+              </span>
+            </div>
+          </div>
+
+          <span className="text-[9px] text-zinc-500">CPU preemption & dispatch swaps</span>
         </div>
       </div>
 

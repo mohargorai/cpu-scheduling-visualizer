@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { useStore } from '../store';
-import { Plus, Trash2, Users, Activity, Upload, Settings, Cpu, Shuffle, Target, Sparkles, X } from 'lucide-react';
+import { Plus, Trash2, Users, Activity, Upload, Settings, Cpu, Shuffle, Target, Sparkles, X, ArrowUpDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProcessColor } from './GanttChart';
 
@@ -262,12 +262,20 @@ export function ProcessInput() {
     const lastProcess = processes[processes.length - 1];
     const newIdNum = lastProcess ? (parseInt(lastProcess.id.replace('P', '')) || processes.length) + 1 : 1;
     const id = `P${newIdNum}`;
+    const curArrival = parseInt(newProcess.arrivalTime) || 0;
+    const curBurst = parseInt(newProcess.burstTime) || 1;
+    const curPriority = parseInt(newProcess.priority) || 1;
     addProcess({
       id,
-      arrivalTime: parseInt(newProcess.arrivalTime) || 0,
-      burstTime: parseInt(newProcess.burstTime) || 1,
-      priority: parseInt(newProcess.priority) || 1
+      arrivalTime: curArrival,
+      burstTime: curBurst,
+      priority: curPriority
     });
+    // Smart auto-advance: increments arrival time smoothly for rapid multi-process test entry
+    setNewProcess(prev => ({
+      ...prev,
+      arrivalTime: curArrival + Math.max(1, Math.min(curBurst, 3))
+    }));
   };
 
   const handleFileUpload = (e) => {
@@ -457,6 +465,19 @@ export function ProcessInput() {
             </span>
           </h2>
           <div className="flex items-center gap-2">
+            {processes.length > 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const sorted = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
+                  setProcesses(sorted);
+                }}
+                className="text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 px-2 py-1 rounded-md bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 shadow-xs"
+                title="Sort process queue by arrival time (ascending)"
+              >
+                <ArrowUpDown className="w-3 h-3 text-emerald-400" /> Sort AT
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setShowPresets(true)}
