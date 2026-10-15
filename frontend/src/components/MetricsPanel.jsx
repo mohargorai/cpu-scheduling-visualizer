@@ -18,28 +18,13 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
   const maxEndTime = trace.length > 0 ? trace[trace.length - 1].endTime : 0;
   const throughput = maxEndTime > 0 ? (metrics.length / maxEndTime).toFixed(3) : 0;
 
-  const contextSwitches = React.useMemo(() => {
-    if (!trace || trace.length <= 1) return 0;
-    let count = 0;
-    let lastProc = null;
-    for (const slice of trace) {
-      if (slice.processId && slice.processId !== 'IDLE') {
-        if (lastProc !== null && lastProc !== slice.processId) {
-          count++;
-        }
-        lastProc = slice.processId;
-      }
-    }
-    return count;
-  }, [trace]);
-
   const totalPages = Math.ceil(metrics.length / pageSize);
   const displayMetrics = metrics.slice(page * pageSize, (page + 1) * pageSize);
 
   return (
     <div className="flex flex-col h-full gap-3">
       {/* Full Final Results Executive Cards */}
-      <div className="flex-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+      <div className="flex-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
         <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Waiting Time</p>
           <div className="flex items-baseline gap-1.5">
@@ -80,17 +65,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
           </div>
         </div>
 
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
-          <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Context Switches</p>
-          <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-orange-400 tracking-tight">
-              <CountUp value={contextSwitches} decimals={0} />
-            </p>
-            <p className="text-zinc-500 font-medium text-[10px]">switches</p>
-          </div>
-        </div>
-
-        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
+        <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800 col-span-2 sm:col-span-1">
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">System Throughput</p>
           <div className="flex items-baseline gap-1.5">
             <p className="text-xl font-bold text-purple-400 tracking-tight">{throughput}</p>

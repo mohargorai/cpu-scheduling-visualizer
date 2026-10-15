@@ -262,20 +262,12 @@ export function ProcessInput() {
     const lastProcess = processes[processes.length - 1];
     const newIdNum = lastProcess ? (parseInt(lastProcess.id.replace('P', '')) || processes.length) + 1 : 1;
     const id = `P${newIdNum}`;
-    const curArrival = parseInt(newProcess.arrivalTime) || 0;
-    const curBurst = parseInt(newProcess.burstTime) || 1;
-    const curPriority = parseInt(newProcess.priority) || 1;
     addProcess({
       id,
-      arrivalTime: curArrival,
-      burstTime: curBurst,
-      priority: curPriority
+      arrivalTime: parseInt(newProcess.arrivalTime) || 0,
+      burstTime: parseInt(newProcess.burstTime) || 1,
+      priority: parseInt(newProcess.priority) || 1
     });
-    // Smart auto-advance: increments arrival time smoothly for rapid multi-process test entry
-    setNewProcess(prev => ({
-      ...prev,
-      arrivalTime: curArrival + Math.max(1, Math.min(curBurst, 3))
-    }));
   };
 
   const handleFileUpload = (e) => {
