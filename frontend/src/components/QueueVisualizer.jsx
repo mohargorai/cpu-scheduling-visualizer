@@ -5,8 +5,10 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProcessColor } from './GanttChart';
+import { useStore } from '../store';
 
 export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS', simulationResult = null }) {
+  const { seekTime } = useStore();
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
@@ -15,6 +17,14 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
   const maxTime = trace.length > 0 ? trace[trace.length - 1].endTime : 0;
 
   const isMultiQueue = algorithm === 'MLQ' || algorithm === 'MLFQ';
+
+  // React to seekTime changes from GanttChart bar clicks
+  useEffect(() => {
+    if (seekTime !== null && seekTime !== undefined) {
+      setCurrentTime(seekTime);
+      setIsPlaying(false);
+    }
+  }, [seekTime]);
 
   useEffect(() => {
     if (!isPlaying) return;

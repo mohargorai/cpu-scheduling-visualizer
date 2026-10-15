@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useStore } from '../store';
 
 export const processColors = [
   '#38bdf8', // Sky 400
@@ -35,6 +36,9 @@ const CustomTooltip = ({ active, payload }) => {
           <p className="flex justify-between font-medium"><span>Duration:</span> <span className="text-white">{d.duration} ms</span></p>
           {d.queue !== undefined && <p className="flex justify-between text-zinc-500 pt-1"><span>Queue:</span> <span>Q{d.queue}</span></p>}
         </div>
+        <div className="mt-2 pt-1.5 border-t border-zinc-900/80 text-[10px] text-sky-400/90 font-medium">
+          ⚡ Click bar to inspect in Live Queues
+        </div>
       </div>
     );
   }
@@ -42,6 +46,7 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 export function GanttChart({ trace }) {
+  const { setSeekTime } = useStore();
   const [page, setPage] = useState(0);
   const pageSize = 15;
 
@@ -92,12 +97,29 @@ export function GanttChart({ trace }) {
               layout="vertical"
               data={displayData}
               margin={{ top: 8, right: 12, left: -20, bottom: 4 }}
+              onClick={(state) => {
+                const item = state?.activePayload?.[0]?.payload;
+                if (item && item.start !== undefined) {
+                  setSeekTime(item.start);
+                }
+              }}
+              className="cursor-pointer"
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={false} />
               <XAxis type="number" stroke="#71717a" tickLine={false} axisLine={false} tick={{fill: '#a1a1aa', fontSize: 11}} />
               <YAxis dataKey="name" type="category" stroke="#71717a" tickLine={false} axisLine={false} width={50} tick={{fontWeight: '500', fill: '#d4d4d8', fontSize: 11}} />
               <Tooltip content={<CustomTooltip />} cursor={{fill: '#18181b', opacity: 0.5}} />
-              <Bar dataKey="duration" radius={[2, 2, 2, 2]} barSize={barSize} isAnimationActive={false}>
+              <Bar 
+                dataKey="duration" 
+                radius={[2, 2, 2, 2]} 
+                barSize={barSize} 
+                isAnimationActive={false}
+                onClick={(entry) => {
+                  if (entry && entry.start !== undefined) {
+                    setSeekTime(entry.start);
+                  }
+                }}
+              >
                 {displayData.map((entry, index) => (
                   <Cell key={`cell-${page}-${index}`} fill={getProcessColor(entry.name)} />
                 ))}

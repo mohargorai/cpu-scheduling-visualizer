@@ -7,14 +7,16 @@ import { ProcessInput } from './components/ProcessInput';
 import { QueueVisualizer } from './components/QueueVisualizer';
 import { ProcessDashboard } from './components/ProcessDashboard';
 import { AlgorithmComparison } from './components/AlgorithmComparison';
-import { Play, Loader2, Layers, LayoutGrid, TableProperties, Scale, Download } from 'lucide-react';
+import { Play, Loader2, Layers, LayoutGrid, TableProperties, Scale, Download, Share2, Check, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { exportSimulationReport } from './utils/reportExporter';
 import { runSimulationEngine } from './simulator';
 
 function App() {
-  const { processes, algorithm, config, setSimulationResult, simulationResult } = useStore();
+  const { processes, algorithm, config, setSimulationResult, simulationResult, setProcesses, setAlgorithm, setConfig } = useStore();
   const [loading, setLoading] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [shareNotice, setShareNotice] = useState('');
   const [activeTab, setActiveTab] = useState(() => {
     if (window.location.hash === '#dashboard') return 'dashboard';
     if (window.location.hash === '#comparison') return 'comparison';
@@ -34,6 +36,72 @@ function App() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  // Auto-load shared scenario from URL parameters
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlAlgo = params.get('algo');
+      const urlProcs = params.get('procs');
+      const urlTq = params.get('tq');
+      const urlQuanta = params.get('quanta');
+      const urlAging = params.get('aging');
+
+      if (urlAlgo) {
+        setAlgorithm(urlAlgo);
+      }
+      if (urlTq || urlQuanta || urlAging) {
+        setConfig({
+          ...(urlTq ? { timeQuantum: parseInt(urlTq) || 2 } : {}),
+          ...(urlQuanta ? { quanta: urlQuanta.split(',').map(Number) } : {}),
+          ...(urlAging ? { agingThreshold: parseInt(urlAging) || 10 } : {}),
+        });
+      }
+      if (urlProcs) {
+        const parsed = urlProcs.split(',').map(item => {
+          const parts = item.split(':');
+          return {
+            id: parts[0] || 'P1',
+            arrivalTime: Math.max(0, parseInt(parts[1]) || 0),
+            burstTime: Math.max(1, parseInt(parts[2]) || 1),
+            priority: parseInt(parts[3]) || 1
+          };
+        }).filter(p => p.id && p.burstTime > 0);
+
+        if (parsed.length > 0) {
+          setProcesses(parsed);
+          setShareNotice(`Loaded shared ${urlAlgo || 'CPU'} scenario (${parsed.length} processes)`);
+          setTimeout(() => setShareNotice(''), 4500);
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to parse URL simulation parameters:", e);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleShareSimulation = () => {
+    if (processes.length === 0) return;
+    try {
+      const params = new URLSearchParams();
+      params.set('algo', algorithm);
+      const procStr = processes.map(p => `${p.id}:${p.arrivalTime}:${p.burstTime}:${p.priority || 1}`).join(',');
+      params.set('procs', procStr);
+
+      if (config?.timeQuantum) params.set('tq', config.timeQuantum);
+      if (config?.quanta) params.set('quanta', config.quanta.join(','));
+      if (config?.agingThreshold) params.set('aging', config.agingThreshold);
+
+      const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}${window.location.hash || ''}`;
+      
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2500);
+      });
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
+  };
 
   const switchTab = (tab) => {
     setActiveTab(tab);
@@ -175,6 +243,28 @@ function App() {
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
+          {processes.length > 0 && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleShareSimulation}
+              className="flex items-center justify-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-800 font-semibold py-2 px-3 rounded-lg text-xs transition-colors shadow-sm"
+              title="Copy shareable link with current workload and algorithm"
+            >
+              {copiedLink ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-400 font-bold">Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-zinc-400" />
+                  <span className="hidden sm:inline">Share Link</span>
+                </>
+              )}
+            </motion.button>
+          )}
+
           {simulationResult && (
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -320,6 +410,21 @@ function App() {
                 )}
               </AnimatePresence>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Shared Scenario Notice */}
+      <AnimatePresence>
+        {shareNotice && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-5 right-5 z-50 bg-emerald-950/95 border border-emerald-500/40 text-emerald-200 px-4 py-2.5 rounded-xl shadow-2xl text-xs flex items-center gap-2.5 backdrop-blur-md"
+          >
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="font-semibold">{shareNotice}</span>
           </motion.div>
         )}
       </AnimatePresence>

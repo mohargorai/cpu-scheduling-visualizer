@@ -20,7 +20,7 @@ const ALGORITHMS = [
 ];
 
 export function AlgorithmComparison() {
-  const { processes, config } = useStore();
+  const { processes, config, setProcesses } = useStore();
   const [algoA, setAlgoA] = useState('FCFS');
   const [algoB, setAlgoB] = useState('MLFQ');
   const [resultA, setResultA] = useState(null);
@@ -231,6 +231,76 @@ export function AlgorithmComparison() {
             <span>Re-Compare</span>
           </button>
         </div>
+      </div>
+
+      {/* 1-Click Educational Benchmark Scenarios */}
+      <div className="flex flex-wrap items-center gap-2 p-2.5 px-3.5 bg-zinc-950/80 rounded-xl border border-zinc-900 shadow-sm text-xs">
+        <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-wider shrink-0 mr-1">
+          Benchmark Presets:
+        </span>
+        <button
+          onClick={() => {
+            setAlgoA('FCFS');
+            setAlgoB('RR');
+            setProcesses([
+              { id: 'P1', arrivalTime: 0, burstTime: 24, priority: 1 },
+              { id: 'P2', arrivalTime: 0, burstTime: 3, priority: 1 },
+              { id: 'P3', arrivalTime: 0, burstTime: 3, priority: 1 }
+            ]);
+          }}
+          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+          title="Demonstrates how long jobs block short jobs in FCFS vs fair Round Robin"
+        >
+          ⚡ Convoy Effect (FCFS vs RR)
+        </button>
+        <button
+          onClick={() => {
+            setAlgoA('FCFS');
+            setAlgoB('SJF');
+            setProcesses([
+              { id: 'P1', arrivalTime: 0, burstTime: 8, priority: 1 },
+              { id: 'P2', arrivalTime: 1, burstTime: 4, priority: 1 },
+              { id: 'P3', arrivalTime: 2, burstTime: 9, priority: 1 },
+              { id: 'P4', arrivalTime: 3, burstTime: 2, priority: 1 }
+            ]);
+          }}
+          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+          title="Shows mathematical optimality of Shortest Job First waiting times"
+        >
+          ⏱️ Optimal Waiting (FCFS vs SJF)
+        </button>
+        <button
+          onClick={() => {
+            setAlgoA('FCFS');
+            setAlgoB('MLFQ');
+            setProcesses([
+              { id: 'P1', arrivalTime: 0, burstTime: 20, priority: 1 },
+              { id: 'P2', arrivalTime: 2, burstTime: 3, priority: 1 },
+              { id: 'P3', arrivalTime: 4, burstTime: 3, priority: 1 },
+              { id: 'P4', arrivalTime: 6, burstTime: 2, priority: 1 },
+              { id: 'P5', arrivalTime: 8, burstTime: 1, priority: 1 }
+            ]);
+          }}
+          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+          title="Shows multi-queue demotion and responsiveness for mixed interactive tasks"
+        >
+          🔄 Feedback Queues (FCFS vs MLFQ)
+        </button>
+        <button
+          onClick={() => {
+            setAlgoA('Priority');
+            setAlgoB('PreemptivePriority');
+            setProcesses([
+              { id: 'P1', arrivalTime: 0, burstTime: 10, priority: 3 },
+              { id: 'P2', arrivalTime: 2, burstTime: 4, priority: 1 },
+              { id: 'P3', arrivalTime: 4, burstTime: 2, priority: 2 }
+            ]);
+          }}
+          className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+          title="Compares non-preemptive vs preemptive priority interruption"
+        >
+          🎯 Priority Preemption Showdown
+        </button>
       </div>
 
       {/* Educational Executive Verdict Banner */}
