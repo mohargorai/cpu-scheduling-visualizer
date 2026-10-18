@@ -365,6 +365,7 @@ export function ProcessInput() {
                 className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-white outline-none appearance-none font-medium transition-colors cursor-pointer"
                 value={algorithm}
                 onChange={(e) => setAlgorithm(e.target.value)}
+                aria-label="Select scheduling algorithm"
               >
                 {(algorithm === 'MLQ' || algorithm === 'MLFQ' ? [
                   { id: 'MLQ', name: 'Multilevel Queue (MLQ)' },
@@ -399,6 +400,7 @@ export function ProcessInput() {
               </label>
               <input
                 type="number" min="1"
+                aria-label="Time Quantum"
                 className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-white outline-none font-medium transition-colors"
                 value={config.timeQuantum === '' ? '' : config.timeQuantum}
                 onChange={(e) => setConfig({ timeQuantum: e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1) })}
@@ -510,6 +512,7 @@ export function ProcessInput() {
                             type="number"
                             min="0"
                             autoFocus
+                            aria-label="Edit arrival time"
                             value={editingCell.val}
                             onChange={(e) => setEditingCell({ ...editingCell, val: e.target.value })}
                             onKeyDown={(e) => {
@@ -536,6 +539,7 @@ export function ProcessInput() {
                             type="number"
                             min="1"
                             autoFocus
+                            aria-label="Edit burst time"
                             value={editingCell.val}
                             onChange={(e) => setEditingCell({ ...editingCell, val: e.target.value })}
                             onKeyDown={(e) => {
@@ -562,6 +566,7 @@ export function ProcessInput() {
                             type="number"
                             min="1"
                             autoFocus
+                            aria-label="Edit priority"
                             value={editingCell.val}
                             onChange={(e) => setEditingCell({ ...editingCell, val: e.target.value })}
                             onKeyDown={(e) => {
@@ -638,15 +643,15 @@ export function ProcessInput() {
           <div className="grid grid-cols-3 gap-2.5 mb-3">
             <div>
               <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400 mb-1">Arrival</label>
-              <input type="number" min="0" value={newProcess.arrivalTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({ ...newProcess, arrivalTime: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="0" aria-label="Arrival Time" value={newProcess.arrivalTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({ ...newProcess, arrivalTime: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400 mb-1">Burst</label>
-              <input type="number" min="1" value={newProcess.burstTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({ ...newProcess, burstTime: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="1" aria-label="Burst Time" value={newProcess.burstTime} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({ ...newProcess, burstTime: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400 mb-1">Priority</label>
-              <input type="number" min="1" value={newProcess.priority} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({ ...newProcess, priority: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
+              <input type="number" min="1" aria-label="Priority Level" value={newProcess.priority} onKeyDown={e => e.key === 'Enter' && handleAdd()} onChange={e => setNewProcess({ ...newProcess, priority: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-zinc-950 border border-zinc-800 text-white rounded p-1.5 text-xs font-medium outline-none focus:border-zinc-600 transition-colors" />
             </div>
           </div>
 
@@ -780,6 +785,7 @@ export function ProcessInput() {
                 </div>
                 <button
                   onClick={() => setShowPresets(false)}
+                  aria-label="Close presets dialog"
                   className="p-1 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-900 transition-colors"
                 >
                   <X className="w-4 h-4" />

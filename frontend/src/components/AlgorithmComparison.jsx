@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useStore } from '../store';
 import { GanttChart } from './GanttChart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Sparkles, Loader2, Download, Scale, Trophy, ArrowRight } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Sparkles, Loader2, Download, Scale, Trophy } from 'lucide-react';
 import { exportSimulationReport } from '../utils/reportExporter';
 import { runSimulationEngine } from '../simulator';
 
@@ -182,12 +182,13 @@ export function AlgorithmComparison() {
       {/* Selector & Action Ribbon */}
       <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-900 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase font-bold text-zinc-500">Algorithm A (Baseline):</span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
+            <span className="text-[10px] uppercase font-bold text-zinc-500 whitespace-nowrap">Algorithm A (Baseline):</span>
             <select
               value={algoA}
               onChange={(e) => setAlgoA(e.target.value)}
-              className="bg-zinc-900 border border-zinc-800 text-white text-xs font-semibold rounded-lg px-2.5 py-1.5 outline-none cursor-pointer hover:border-zinc-700"
+              aria-label="Algorithm A (Baseline)"
+              className="bg-zinc-900 border border-zinc-800 text-white text-xs font-semibold rounded-lg px-2.5 py-1.5 outline-none cursor-pointer hover:border-zinc-700 w-full sm:w-auto"
             >
               {ALGORITHMS.map(a => (
                 <option key={a.id} value={a.id}>{a.name}</option>
@@ -195,14 +196,15 @@ export function AlgorithmComparison() {
             </select>
           </div>
 
-          <div className="text-zinc-600 font-bold text-xs px-1">VS</div>
+          <div className="hidden sm:block text-zinc-600 font-bold text-xs px-1">VS</div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase font-bold text-sky-400">Algorithm B (Comparison):</span>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 w-full sm:w-auto">
+            <span className="text-[10px] uppercase font-bold text-sky-400 whitespace-nowrap">Algorithm B (Comparison):</span>
             <select
               value={algoB}
               onChange={(e) => setAlgoB(e.target.value)}
-              className="bg-zinc-900 border border-sky-900/60 text-white text-xs font-semibold rounded-lg px-2.5 py-1.5 outline-none cursor-pointer hover:border-sky-600"
+              aria-label="Algorithm B (Comparison)"
+              className="bg-zinc-900 border border-sky-900/60 text-white text-xs font-semibold rounded-lg px-2.5 py-1.5 outline-none cursor-pointer hover:border-sky-600 w-full sm:w-auto"
             >
               {ALGORITHMS.map(a => (
                 <option key={a.id} value={a.id}>{a.name}</option>

@@ -188,7 +188,7 @@ function App() {
       >
         <div className="flex items-center gap-4 w-full md:w-auto justify-start">
           <div className="w-10 h-10 p-1 bg-zinc-900 rounded-lg border border-zinc-800 hidden sm:flex items-center justify-center shadow-inner">
-            <img src="/favicon.svg" alt="CPU Scheduling Logo" className="w-7 h-7" />
+            <img src="/favicon.svg" alt="CPU Scheduling Logo" width="28" height="28" className="w-7 h-7" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-white tracking-tight leading-tight">CPU Scheduling & MLFQ Visualizer</h1>
@@ -242,12 +242,13 @@ function App() {
           </button>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap sm:flex-nowrap">
           {processes.length > 0 && (
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleShareSimulation}
+              aria-label="Copy shareable link"
               className="flex items-center justify-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-800 font-semibold py-2 px-3 rounded-lg text-xs transition-colors shadow-sm"
               title="Copy shareable link with current workload and algorithm"
             >
@@ -270,6 +271,7 @@ function App() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => exportSimulationReport({ algorithm, processes, simulationResult })}
+              aria-label="Export simulation report as PNG"
               className="flex items-center justify-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-800 font-semibold py-2 px-3.5 rounded-lg text-xs transition-colors shadow-sm"
               title="Export high-resolution PNG summary report"
             >
@@ -283,10 +285,11 @@ function App() {
             whileTap={{ scale: 0.98 }}
             onClick={runSimulation}
             disabled={loading || processes.length === 0}
+            aria-label="Run CPU scheduling simulation"
             className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-white hover:bg-zinc-200 text-black font-bold py-2 px-5 rounded-lg transition-all disabled:opacity-50 shadow-sm"
           >
             {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
-            <span className="text-xs">{loading ? 'Simulating...' : 'Run Simulation'}</span>
+            <span className="text-xs">{loading ? 'Simulating…' : 'Run Simulation'}</span>
           </motion.button>
         </div>
       </motion.header>

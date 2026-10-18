@@ -28,7 +28,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
         <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Waiting Time</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-amber-400 tracking-tight">
+            <p className="text-xl font-bold text-amber-400 tracking-tight tabular-nums">
               <CountUp value={avg.avgWT || 0} decimals={2} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
@@ -38,7 +38,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
         <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Average Turnaround Time</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-sky-400 tracking-tight">
+            <p className="text-xl font-bold text-sky-400 tracking-tight tabular-nums">
               <CountUp value={avg.avgTAT || 0} decimals={2} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
@@ -48,7 +48,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
         <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">CPU Utilization</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-emerald-400 tracking-tight">
+            <p className="text-xl font-bold text-emerald-400 tracking-tight tabular-nums">
               <CountUp value={avg.cpuUtilization || 0} decimals={2} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">%</p>
@@ -58,7 +58,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
         <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800">
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">Total Makespan</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-white tracking-tight">
+            <p className="text-xl font-bold text-white tracking-tight tabular-nums">
               <CountUp value={maxEndTime} decimals={0} />
             </p>
             <p className="text-zinc-500 font-medium text-[10px]">ms</p>
@@ -68,7 +68,7 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
         <div className="bg-zinc-900/90 p-2.5 rounded-lg border border-zinc-800 col-span-2 sm:col-span-1">
           <p className="text-[9px] uppercase tracking-wider font-semibold text-zinc-500 mb-0.5">System Throughput</p>
           <div className="flex items-baseline gap-1.5">
-            <p className="text-xl font-bold text-purple-400 tracking-tight">{throughput}</p>
+            <p className="text-xl font-bold text-purple-400 tracking-tight tabular-nums">{throughput}</p>
             <p className="text-zinc-500 font-medium text-[10px]">p/ms</p>
           </div>
         </div>
@@ -92,14 +92,16 @@ export function MetricsPanel({ metrics = [], avg = {}, trace = [] }) {
               <button 
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={page === 0}
+                aria-label="Previous metrics page"
                 className="p-1 hover:text-white disabled:opacity-30 text-zinc-500 transition-colors"
               ><ChevronLeft className="w-3.5 h-3.5" /></button>
-              <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+              <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest tabular-nums">
                 Pg {page + 1}/{totalPages}
               </span>
               <button 
                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={page === totalPages - 1}
+                aria-label="Next metrics page"
                 className="p-1 hover:text-white disabled:opacity-30 text-zinc-500 transition-colors"
               ><ChevronRight className="w-3.5 h-3.5" /></button>
             </div>

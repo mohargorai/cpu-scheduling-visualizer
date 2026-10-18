@@ -309,8 +309,9 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
               <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search Process ID (e.g. P1)..."
+                placeholder="Search Process ID (e.g. P1)…"
                 value={searchTerm}
+                aria-label="Search processes by ID"
                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                 className="w-full bg-zinc-900/90 border border-zinc-800 text-white rounded-lg pl-8 pr-3 py-1.5 text-xs focus:ring-1 focus:ring-white outline-none placeholder:text-zinc-600 transition-colors"
               />
@@ -353,6 +354,7 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
               <span className="text-[10px] uppercase font-semibold text-zinc-500">Rows:</span>
               <select
                 value={pageSize}
+                aria-label="Rows per page"
                 onChange={(e) => {
                   setPageSize(e.target.value === 'all' ? 'all' : parseInt(e.target.value));
                   setCurrentPage(1);
@@ -540,18 +542,20 @@ export function ProcessDashboard({ onRunSimulation, loading }) {
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
+                aria-label="Previous page"
                 className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-30 disabled:pointer-events-none text-zinc-300 transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
 
-              <span className="text-[11px] font-semibold text-zinc-400 px-2">
+              <span className="text-[11px] font-semibold text-zinc-400 px-2 tabular-nums">
                 Page {currentPage} of {totalPages}
               </span>
 
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
+                aria-label="Next page"
                 className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-30 disabled:pointer-events-none text-zinc-300 transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />

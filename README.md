@@ -30,9 +30,21 @@
   - Preemptive Priority Scheduling
   - Multilevel Queue (MLQ - Priority Partitioned)
   - Multi-Level Feedback Queue (MLFQ - Dynamic Demotion & Aging)
+- **Interactive Execution Timeline & Click-to-Seek:**
+  - Color-coded Gantt chart with millisecond time boundaries.
+  - Interactive click-to-seek: clicking any execution bar immediately synchronizes and jumps the Live Queue Visualizer to that point in time.
+- **Shareable Scenario Links:**
+  - One-click copy of URL-encoded simulations (`?algo=...&procs=...&tq=...`) to share exact scenarios and test cases with peers and professors.
+  - Automatic URL parsing and workload loading with confirmation notice.
+- **1-Click "Sort by Arrival Time" (`Sort AT`):**
+  - Instant chronological ordering of all processes in the queue for clean textbook verification.
+- **Dual-Engine Architecture (Full Offline Fallback):**
+  - High-performance Node.js/Express backend API for server simulations.
+  - Integrated in-browser client simulation engine that seamlessly runs full simulations offline or on static deployments with zero backend dependency.
 - **Multi-Algorithm Comparison View (`#comparison`):**
   - Side-by-side benchmarking of any two scheduling algorithms simultaneously.
-  - Performance delta badges showing percentage improvements/regressions in Average Turnaround Time, Waiting Time, CPU Utilization, and Total Makespan.
+  - Directional delta badges showing percentage improvements/regressions in Average Turnaround Time, Waiting Time, CPU Utilization, and Total Makespan.
+  - Educational executive verdict banner providing textbook takeaways and insights for any algorithm pair.
   - Synchronized dual Gantt chart execution timelines and comparative turnaround vs. waiting time bar charts.
 - **Curated Educational Presets Modal:**
   - Six pre-configured standard OS benchmark scenarios: CPU Idle Gap (proves CPU Utilization < 100%), Convoy Effect (FCFS), SJF Optimal Makespan, Priority Inversion & Starvation, Round Robin Fair-Share Slicing, and MLFQ Dynamic Demotion & Aging.
@@ -63,7 +75,7 @@
 - **Premium UI/UX:**
   - Pure Black (`#000000`) high-contrast dark theme with curated minimal solid accent colors.
   - Three top-level navigation views: Visualizer, Process Dashboard, and Algorithm Comparison.
-  - 100% responsive across mobile (375px+), tablet, and desktop viewports.
+  - 100% responsive across mobile (320px+), tablet, and desktop viewports.
 
 ## 🛠️ Technology Stack
 

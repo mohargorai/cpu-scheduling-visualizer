@@ -549,7 +549,7 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
 
       {/* Scrubbing & Playback Controller */}
       <div className="shrink-0 bg-zinc-900/60 p-2.5 rounded-lg border border-zinc-800">
-        <div className="flex justify-between items-center mb-1.5">
+        <div className="flex justify-between items-center mb-1.5 tabular-nums">
           <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">T = 0 ms</span>
           <span className="bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider border border-sky-500/20 shadow-sm">
             TIME = {currentTime} ms
@@ -562,7 +562,8 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
           min="0" max={maxTime} 
           value={currentTime}
           onChange={(e) => { setCurrentTime(parseInt(e.target.value)); setIsPlaying(false); }}
-          className="w-full h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-sky-400 mb-2.5 border border-zinc-700/50"
+          aria-label="Simulation timeline scrubber"
+          className="w-full h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-sky-400 mb-2.5 border border-zinc-700/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-500"
         />
         
         <div className="flex items-center justify-center gap-3 relative">
@@ -662,6 +663,7 @@ export function QueueVisualizer({ trace = [], processes = [], algorithm = 'FCFS'
               </div>
               <button 
                 onClick={() => setShowDecisionLog(false)}
+                aria-label="Close decision log drawer"
                 className="p-1 text-zinc-400 hover:text-white rounded hover:bg-zinc-900 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />

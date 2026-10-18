@@ -134,14 +134,16 @@ export function GanttChart({ trace }) {
           <button 
             onClick={() => setPage(p => Math.max(0, p - 1))}
             disabled={page === 0}
+            aria-label="Previous timeline page"
             className="p-1 hover:text-white disabled:opacity-30 text-zinc-500 transition-colors"
           ><ChevronLeft className="w-4 h-4" /></button>
-          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest tabular-nums">
             Page {page + 1} of {totalPages}
           </span>
           <button 
             onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
             disabled={page === totalPages - 1}
+            aria-label="Next timeline page"
             className="p-1 hover:text-white disabled:opacity-30 text-zinc-500 transition-colors"
           ><ChevronRight className="w-4 h-4" /></button>
         </div>
