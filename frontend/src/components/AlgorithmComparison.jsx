@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useStore } from '../store';
 import { GanttChart } from './GanttChart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Sparkles, Loader2, Download, Scale, Trophy } from 'lucide-react';
 import { exportSimulationReport } from '../utils/reportExporter';
 import { runSimulationEngine } from '../simulator';

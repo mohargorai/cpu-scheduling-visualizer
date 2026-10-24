@@ -59,7 +59,7 @@ app.use(express.static(distPath));
 
 const fs = require('fs');
 const indexHtml = path.join(distPath, 'index.html');
-app.get('*', (req, res) => {
+app.use((req, res) => {
     if (req.path.startsWith('/api')) {
         return res.status(404).json({ error: 'Endpoint not found' });
     }
